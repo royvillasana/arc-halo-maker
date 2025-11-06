@@ -294,7 +294,7 @@ export class CanvasManager {
     text.split('').forEach((char, i) => {
       this.ctx.save();
       this.ctx.translate(centerX, centerY);
-      this.ctx.rotate(currentAngle + (charWidths[i] * anglePerPixel) / 2);
+      this.ctx.rotate(currentAngle + (charWidths[i] * anglePerPixel) / 2 + Math.PI / 2);
       this.ctx.translate(0, -textRadius - layer.data.radialOffset);
 
       // Draw text stroke
@@ -308,8 +308,8 @@ export class CanvasManager {
       this.ctx.fillStyle = layer.data.color;
       this.ctx.fillText(char, 0, 0);
 
-      this.ctx.restore();
       currentAngle += charWidths[i] * anglePerPixel;
+      this.ctx.restore();
     });
   }
 
