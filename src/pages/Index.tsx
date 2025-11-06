@@ -88,6 +88,9 @@ const Index = () => {
           borderWidth: config.ribbon.borderWidth,
           shadowBlur: config.ribbon.shadowBlur,
           shadowOpacity: config.ribbon.shadowOpacity,
+          style: config.ribbon.style,
+          badgeRotation: config.ribbon.badgeRotation,
+          badgeOffsetY: config.ribbon.badgeOffsetY,
         },
       };
       newLayers.push(ribbonLayer);

@@ -32,6 +32,9 @@ export interface RibbonLayer extends Layer {
     borderWidth: number;
     shadowBlur: number;
     shadowOpacity: number;
+    style: 'arc' | 'badge';
+    badgeRotation: number;
+    badgeOffsetY: number;
   };
 }
 

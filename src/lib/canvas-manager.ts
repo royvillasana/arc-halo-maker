@@ -146,7 +146,80 @@ export class CanvasManager {
     const centerX = this.canvasSize / 2;
     const centerY = this.canvasSize / 2;
     const radius = this.canvasSize / 2;
+
+    this.ctx.save();
+
+    if (layer.data.style === 'badge') {
+      // Render pill-shaped badge
+      this.renderBadgeStyle(layer, centerX, centerY);
+    } else {
+      // Render traditional arc style
+      this.renderArcStyle(layer, centerX, centerY, radius);
+    }
+
+    this.ctx.restore();
+  }
+
+  private renderBadgeStyle(layer: RibbonLayer, centerX: number, centerY: number) {
+    // Get text to calculate badge size
+    const textLayer = this.layers.find(l => l.type === 'text') as TextLayer;
+    if (!textLayer || !textLayer.data.content) return;
+
+    const text = this.formatText(textLayer.data.content, textLayer.data.textCase);
+    const fontSize = textLayer.data.fontSize;
     
+    this.ctx.font = `bold ${fontSize}px ${textLayer.data.fontFamily}`;
+    const textWidth = this.ctx.measureText(text).width;
+    
+    // Badge dimensions
+    const padding = 12;
+    const badgeWidth = textWidth + padding * 2;
+    const badgeHeight = fontSize + padding;
+    const borderRadius = badgeHeight / 2;
+
+    // Position (offsetY from center)
+    const x = centerX;
+    const y = centerY + layer.data.badgeOffsetY;
+
+    this.ctx.save();
+    this.ctx.translate(x, y);
+    this.ctx.rotate((layer.data.badgeRotation * Math.PI) / 180);
+
+    // Shadow
+    if (layer.data.shadowBlur > 0) {
+      this.ctx.shadowBlur = layer.data.shadowBlur;
+      this.ctx.shadowColor = `rgba(0, 0, 0, ${layer.data.shadowOpacity})`;
+      this.ctx.shadowOffsetY = 2;
+    }
+
+    // Draw rounded rectangle badge
+    this.ctx.beginPath();
+    this.ctx.moveTo(-badgeWidth / 2 + borderRadius, -badgeHeight / 2);
+    this.ctx.lineTo(badgeWidth / 2 - borderRadius, -badgeHeight / 2);
+    this.ctx.quadraticCurveTo(badgeWidth / 2, -badgeHeight / 2, badgeWidth / 2, -badgeHeight / 2 + borderRadius);
+    this.ctx.lineTo(badgeWidth / 2, badgeHeight / 2 - borderRadius);
+    this.ctx.quadraticCurveTo(badgeWidth / 2, badgeHeight / 2, badgeWidth / 2 - borderRadius, badgeHeight / 2);
+    this.ctx.lineTo(-badgeWidth / 2 + borderRadius, badgeHeight / 2);
+    this.ctx.quadraticCurveTo(-badgeWidth / 2, badgeHeight / 2, -badgeWidth / 2, badgeHeight / 2 - borderRadius);
+    this.ctx.lineTo(-badgeWidth / 2, -badgeHeight / 2 + borderRadius);
+    this.ctx.quadraticCurveTo(-badgeWidth / 2, -badgeHeight / 2, -badgeWidth / 2 + borderRadius, -badgeHeight / 2);
+    this.ctx.closePath();
+
+    this.ctx.fillStyle = layer.data.color;
+    this.ctx.fill();
+
+    // Draw border
+    if (layer.data.borderWidth > 0) {
+      this.ctx.shadowBlur = 0;
+      this.ctx.strokeStyle = layer.data.borderColor;
+      this.ctx.lineWidth = layer.data.borderWidth;
+      this.ctx.stroke();
+    }
+
+    this.ctx.restore();
+  }
+
+  private renderArcStyle(layer: RibbonLayer, centerX: number, centerY: number, radius: number) {
     const ribbonRadius = radius - (radius * layer.data.thickness) / 100;
     const ribbonThickness = (radius * layer.data.thickness) / 100;
     const startAngle = (layer.data.startAngle * Math.PI) / 180;
@@ -190,20 +263,78 @@ export class CanvasManager {
   }
 
   private renderTextLayer(layer: TextLayer) {
-    if (!layer.data.content || !layer.data.ribbonRadius) return;
+    if (!layer.data.content) return;
 
     const centerX = this.canvasSize / 2;
     const centerY = this.canvasSize / 2;
-    const textRadius = layer.data.ribbonRadius;
 
     const text = this.formatText(layer.data.content, layer.data.textCase);
     const fontSize = layer.data.fontSize;
-    const letterSpacing = layer.data.letterSpacing;
 
     this.ctx.save();
     this.ctx.font = `bold ${fontSize}px ${layer.data.fontFamily}`;
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
+
+    // Find ribbon layer to determine style
+    const ribbonLayer = this.layers.find(l => l.type === 'ribbon' && l.visible) as RibbonLayer;
+    if (!ribbonLayer) {
+      this.ctx.restore();
+      return;
+    }
+
+    if (ribbonLayer.data.style === 'badge') {
+      // Render straight text for badge
+      this.renderBadgeText(layer, text, fontSize, centerX, centerY, ribbonLayer);
+    } else {
+      // Render curved text for arc
+      this.renderCurvedText(layer, text, fontSize, centerX, centerY, ribbonLayer);
+    }
+
+    this.ctx.restore();
+  }
+
+  private renderBadgeText(
+    layer: TextLayer,
+    text: string,
+    fontSize: number,
+    centerX: number,
+    centerY: number,
+    ribbonLayer: RibbonLayer
+  ) {
+    const x = centerX;
+    const y = centerY + ribbonLayer.data.badgeOffsetY;
+
+    this.ctx.save();
+    this.ctx.translate(x, y);
+    this.ctx.rotate((ribbonLayer.data.badgeRotation * Math.PI) / 180);
+
+    // Draw text stroke
+    if (layer.data.strokeWidth > 0) {
+      this.ctx.strokeStyle = layer.data.strokeColor;
+      this.ctx.lineWidth = layer.data.strokeWidth * 2;
+      this.ctx.strokeText(text, 0, 0);
+    }
+
+    // Draw text fill
+    this.ctx.fillStyle = layer.data.color;
+    this.ctx.fillText(text, 0, 0);
+
+    this.ctx.restore();
+  }
+
+  private renderCurvedText(
+    layer: TextLayer,
+    text: string,
+    fontSize: number,
+    centerX: number,
+    centerY: number,
+    ribbonLayer: RibbonLayer
+  ) {
+    if (!layer.data.ribbonRadius) return;
+
+    const textRadius = layer.data.ribbonRadius;
+    const letterSpacing = layer.data.letterSpacing;
 
     // Calculate total text width including letter spacing
     const charWidths = text.split('').map((char) => this.ctx.measureText(char).width + letterSpacing);
@@ -212,13 +343,6 @@ export class CanvasManager {
     // Calculate arc angle for the text
     const anglePerPixel = 1 / textRadius;
     const totalAngle = totalWidth * anglePerPixel;
-
-    // Find ribbon layer to get start angle
-    const ribbonLayer = this.layers.find(l => l.type === 'ribbon' && l.visible) as RibbonLayer;
-    if (!ribbonLayer) {
-      this.ctx.restore();
-      return;
-    }
 
     const startAngle =
       (ribbonLayer.data.startAngle * Math.PI) / 180 + 
@@ -247,8 +371,6 @@ export class CanvasManager {
       this.ctx.restore();
       currentAngle += charWidths[i] * anglePerPixel;
     });
-
-    this.ctx.restore();
   }
 
   private formatText(text: string, textCase: 'upper' | 'title' | 'lower'): string {

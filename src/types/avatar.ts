@@ -8,6 +8,10 @@ export interface RibbonConfig {
   borderWidth: number;
   shadowBlur: number;
   shadowOpacity: number;
+  // Pill badge style
+  style: 'arc' | 'badge';
+  badgeRotation: number; // rotation in degrees
+  badgeOffsetY: number; // vertical offset from center
 }
 
 export interface TextConfig {
@@ -51,7 +55,7 @@ export const defaultAvatarConfig: AvatarConfig = {
   imageY: 0,
   ribbon: {
     visible: true,
-    color: '#31A24C',
+    color: '#35b76f',
     thickness: 16,
     startAngle: 215,
     arcWidth: 150,
@@ -59,6 +63,9 @@ export const defaultAvatarConfig: AvatarConfig = {
     borderWidth: 0,
     shadowBlur: 8,
     shadowOpacity: 0.25,
+    style: 'badge',
+    badgeRotation: 20,
+    badgeOffsetY: 280,
   },
   text: {
     content: '#OPENTOWORK',
@@ -85,7 +92,7 @@ export const presets: Preset[] = [
     config: {
       ribbon: {
         visible: true,
-        color: '#31A24C',
+        color: '#35b76f',
         thickness: 16,
         startAngle: 215,
         arcWidth: 150,
@@ -93,6 +100,9 @@ export const presets: Preset[] = [
         borderWidth: 0,
         shadowBlur: 8,
         shadowOpacity: 0.25,
+        style: 'badge',
+        badgeRotation: 20,
+        badgeOffsetY: 280,
       },
       text: {
         content: '#OPENTOWORK',
@@ -120,6 +130,9 @@ export const presets: Preset[] = [
         borderWidth: 0,
         shadowBlur: 8,
         shadowOpacity: 0.25,
+        style: 'badge',
+        badgeRotation: 20,
+        badgeOffsetY: 280,
       },
       text: {
         content: '#HIRING',
@@ -147,6 +160,9 @@ export const presets: Preset[] = [
         borderWidth: 0,
         shadowBlur: 8,
         shadowOpacity: 0.25,
+        style: 'badge',
+        badgeRotation: 20,
+        badgeOffsetY: 280,
       },
       text: {
         content: '#FREELANCE',
@@ -174,6 +190,9 @@ export const presets: Preset[] = [
         borderWidth: 0,
         shadowBlur: 8,
         shadowOpacity: 0.25,
+        style: 'badge',
+        badgeRotation: 20,
+        badgeOffsetY: 280,
       },
       text: {
         content: '#AVAILABLE',
