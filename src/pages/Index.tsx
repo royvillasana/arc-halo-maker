@@ -272,7 +272,7 @@ const Index = () => {
         </div>
 
         {/* Center Panel - Canvas */}
-        <div className="flex-1 flex flex-col">
+        <div className="relative flex-1 flex flex-col">
           <div className="flex-1 p-4 flex items-center justify-center overflow-auto">
             {config.image ? (
               <PhotoshopCanvas
@@ -300,8 +300,8 @@ const Index = () => {
           
           {/* Toolbar - Always at bottom */}
           {config.image && (
-            <div className="flex justify-center p-4 border-t bg-background">
-              <div className="bg-card border rounded-lg shadow-md p-2">
+            <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center z-50">
+              <div className="pointer-events-auto bg-card/95 supports-[backdrop-filter]:bg-card/80 backdrop-blur border rounded-lg shadow-md p-2">
                 <CanvasToolbar
                   activeTool={activeTool}
                   zoom={zoom}
