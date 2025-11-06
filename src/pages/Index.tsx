@@ -97,8 +97,8 @@ const Index = () => {
       // Text layer (depends on ribbon)
       if (config.text.content) {
         const radius = canvasSize / 2;
+        const ribbonRadius = radius - (radius * config.ribbon.thickness) / 100;
         const ribbonThickness = (radius * config.ribbon.thickness) / 100;
-        const ribbonRadius = radius - ribbonThickness / 2;
 
         const textLayer: TextLayer = {
           id: 'text',
@@ -118,7 +118,7 @@ const Index = () => {
             color: config.text.color,
             strokeColor: config.text.strokeColor,
             strokeWidth: config.text.strokeWidth,
-            ribbonRadius: ribbonRadius - ribbonThickness / 2 - 10,
+            ribbonRadius: ribbonRadius + ribbonThickness / 2,
           },
         };
         newLayers.push(textLayer);
