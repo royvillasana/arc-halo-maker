@@ -41,7 +41,7 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
       }
 
       // Capture the canvas with html2canvas at the selected size
-      const canvas = await html2canvas(canvasContainer, {
+      const capturedCanvas = await html2canvas(canvasContainer, {
         backgroundColor: null,
         scale: selectedSize / 800, // Scale to desired export size
         logging: false,
@@ -50,10 +50,37 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
         height: 800,
       });
 
+      // Create a new canvas with circular mask
+      const outputCanvas = document.createElement('canvas');
+      outputCanvas.width = selectedSize;
+      outputCanvas.height = selectedSize;
+      const ctx = outputCanvas.getContext('2d');
+
+      if (!ctx) {
+        toast.error('Failed to create output canvas');
+        setIsExporting(false);
+        return;
+      }
+
+      // Create circular clip path
+      const centerX = selectedSize / 2;
+      const centerY = selectedSize / 2;
+      const radius = selectedSize / 2;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+
+      // Draw the captured canvas inside the circle
+      ctx.drawImage(capturedCanvas, 0, 0, selectedSize, selectedSize);
+      ctx.restore();
+
       // Download the image
       const link = document.createElement('a');
       link.download = `avatar-${selectedSize}x${selectedSize}.${format}`;
-      link.href = canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', 1.0);
+      link.href = outputCanvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', 1.0);
       link.click();
 
       toast.success(`Avatar exported as ${format.toUpperCase()} (${selectedSize}x${selectedSize})`);
