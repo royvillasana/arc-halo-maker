@@ -273,36 +273,39 @@ const Index = () => {
 
         {/* Center Panel - Canvas */}
         <div className="flex-1 flex flex-col">
-          <div className="p-4 border-b bg-card">
-            <CanvasToolbar
-              activeTool={activeTool}
-              zoom={zoom}
-              onToolChange={setActiveTool}
-              onZoomIn={handleZoomIn}
-              onZoomOut={handleZoomOut}
-              onResetView={handleResetView}
-              onExport={handleExport}
-            />
-          </div>
-          
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-4 flex flex-col items-center justify-center gap-4">
             {config.image ? (
-              <PhotoshopCanvas
-                layers={layers}
-                canvasSize={canvasSize}
-                zoom={zoom}
-                panX={panX}
-                panY={panY}
-                activeTool={activeTool}
-                selectedLayerId={selectedLayerId}
-                eyedropperMode={eyedropperMode}
-                onPanChange={(x, y) => {
-                  setPanX(x);
-                  setPanY(y);
-                }}
-                onImageTransform={handleCanvasImageDrag}
-                onColorPick={handleColorPick}
-              />
+              <>
+                <PhotoshopCanvas
+                  layers={layers}
+                  canvasSize={canvasSize}
+                  zoom={zoom}
+                  panX={panX}
+                  panY={panY}
+                  activeTool={activeTool}
+                  selectedLayerId={selectedLayerId}
+                  eyedropperMode={eyedropperMode}
+                  onPanChange={(x, y) => {
+                    setPanX(x);
+                    setPanY(y);
+                  }}
+                  onImageTransform={handleCanvasImageDrag}
+                  onColorPick={handleColorPick}
+                />
+                <div className="flex justify-center">
+                  <div className="inline-flex bg-card border rounded-lg shadow-sm">
+                    <CanvasToolbar
+                      activeTool={activeTool}
+                      zoom={zoom}
+                      onToolChange={setActiveTool}
+                      onZoomIn={handleZoomIn}
+                      onZoomOut={handleZoomOut}
+                      onResetView={handleResetView}
+                      onExport={handleExport}
+                    />
+                  </div>
+                </div>
+              </>
             ) : (
               <Card className="w-full h-full flex items-center justify-center text-center text-muted-foreground">
                 <p>Upload an image to get started</p>
