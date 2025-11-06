@@ -64,18 +64,29 @@ export const TextControls = ({ config, onChange }: TextControlsProps) => {
       </div>
 
       <div className="space-y-2">
-        <div className="flex justify-between">
-          <Label htmlFor="font-size">Font Size</Label>
-          <span className="text-sm text-muted-foreground">{config.fontSize}px</span>
-        </div>
-        <Slider
-          id="font-size"
-          min={12}
-          max={32}
-          step={1}
-          value={[config.fontSize]}
-          onValueChange={([fontSize]) => onChange({ ...config, fontSize })}
-        />
+        <Label htmlFor="font-size">Font Size</Label>
+        <Select value={config.fontSize.toString()} onValueChange={(value) => onChange({ ...config, fontSize: parseInt(value) })}>
+          <SelectTrigger id="font-size">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="12">12px</SelectItem>
+            <SelectItem value="14">14px</SelectItem>
+            <SelectItem value="16">16px</SelectItem>
+            <SelectItem value="18">18px</SelectItem>
+            <SelectItem value="20">20px</SelectItem>
+            <SelectItem value="24">24px</SelectItem>
+            <SelectItem value="28">28px</SelectItem>
+            <SelectItem value="32">32px</SelectItem>
+            <SelectItem value="36">36px</SelectItem>
+            <SelectItem value="40">40px</SelectItem>
+            <SelectItem value="48">48px</SelectItem>
+            <SelectItem value="56">56px</SelectItem>
+            <SelectItem value="64">64px</SelectItem>
+            <SelectItem value="72">72px</SelectItem>
+            <SelectItem value="80">80px</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">
