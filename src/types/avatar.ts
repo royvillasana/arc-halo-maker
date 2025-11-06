@@ -19,6 +19,8 @@ export interface TextConfig {
   fontSize: number;
   letterSpacing: number;
   radialOffset: number;
+  startAngle: number; // 0-360 degrees
+  arcWidth: number; // 0-360 degrees
   color: string;
   strokeColor: string;
   strokeWidth: number;
@@ -71,6 +73,8 @@ export const defaultAvatarConfig: AvatarConfig = {
     fontSize: 40,
     letterSpacing: 2,
     radialOffset: 0,
+    startAngle: 100,
+    arcWidth: 120,
     color: '#ffffff',
     strokeColor: '#000000',
     strokeWidth: 0,
@@ -107,6 +111,8 @@ export const presets: Preset[] = [
         fontSize: 40,
         letterSpacing: 2,
         radialOffset: 0,
+        startAngle: 100,
+        arcWidth: 120,
         color: '#ffffff',
         strokeColor: '#000000',
         strokeWidth: 0,
@@ -136,6 +142,8 @@ export const presets: Preset[] = [
         fontSize: 40,
         letterSpacing: 2,
         radialOffset: 0,
+        startAngle: 100,
+        arcWidth: 120,
         color: '#ffffff',
         strokeColor: '#000000',
         strokeWidth: 0,
@@ -165,6 +173,8 @@ export const presets: Preset[] = [
         fontSize: 40,
         letterSpacing: 2,
         radialOffset: 0,
+        startAngle: 100,
+        arcWidth: 120,
         color: '#ffffff',
         strokeColor: '#000000',
         strokeWidth: 0,
@@ -194,6 +204,8 @@ export const presets: Preset[] = [
         fontSize: 40,
         letterSpacing: 2,
         radialOffset: 0,
+        startAngle: 100,
+        arcWidth: 120,
         color: '#ffffff',
         strokeColor: '#000000',
         strokeWidth: 0,

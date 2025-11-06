@@ -115,6 +115,8 @@ const Index = () => {
             fontSize: config.text.fontSize,
             letterSpacing: config.text.letterSpacing,
             radialOffset: config.text.radialOffset,
+            startAngle: config.text.startAngle,
+            arcWidth: config.text.arcWidth,
             color: config.text.color,
             strokeColor: config.text.strokeColor,
             strokeWidth: config.text.strokeWidth,

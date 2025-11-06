@@ -46,6 +46,8 @@ export interface TextLayer extends Layer {
     fontSize: number;
     letterSpacing: number;
     radialOffset: number;
+    startAngle: number;
+    arcWidth: number;
     color: string;
     strokeColor: string;
     strokeWidth: number;

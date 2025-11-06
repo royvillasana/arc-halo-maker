@@ -176,8 +176,8 @@ export const PhotoshopCanvas = ({
                   const centerY = canvasSize / 2;
                   const radius = textLayer.data.ribbonRadius || canvasSize / 2;
                   const adjustedRadius = radius - textLayer.data.radialOffset;
-                  const startAngle = ((ribbonLayer.data.startAngle - 90) * Math.PI) / 180;
-                  const endAngle = ((ribbonLayer.data.startAngle + ribbonLayer.data.arcWidth - 90) * Math.PI) / 180;
+                  const startAngle = ((textLayer.data.startAngle - 90) * Math.PI) / 180;
+                  const endAngle = ((textLayer.data.startAngle + textLayer.data.arcWidth - 90) * Math.PI) / 180;
                   
                   // For inside text, we draw from end to start (reverse direction)
                   const startX = centerX + adjustedRadius * Math.cos(endAngle);
@@ -185,7 +185,7 @@ export const PhotoshopCanvas = ({
                   const endX = centerX + adjustedRadius * Math.cos(startAngle);
                   const endY = centerY + adjustedRadius * Math.sin(startAngle);
                   
-                  const largeArcFlag = ribbonLayer.data.arcWidth > 180 ? 1 : 0;
+                  const largeArcFlag = textLayer.data.arcWidth > 180 ? 1 : 0;
                   
                   // Sweep flag 0 for counter-clockwise (inside text orientation)
                   return `M ${startX} ${startY} A ${adjustedRadius} ${adjustedRadius} 0 ${largeArcFlag} 0 ${endX} ${endY}`;

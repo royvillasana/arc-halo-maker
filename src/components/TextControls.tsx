@@ -94,6 +94,51 @@ export const TextControls = ({ config, onChange }: TextControlsProps) => {
       </div>
 
       <div className="space-y-2">
+        <div className="flex justify-between">
+          <Label htmlFor="start-angle">Start Angle</Label>
+          <span className="text-sm text-muted-foreground">{config.startAngle}°</span>
+        </div>
+        <Slider
+          id="start-angle"
+          min={0}
+          max={360}
+          step={1}
+          value={[config.startAngle]}
+          onValueChange={([startAngle]) => onChange({ ...config, startAngle })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <Label htmlFor="arc-width">Arc Width</Label>
+          <span className="text-sm text-muted-foreground">{config.arcWidth}°</span>
+        </div>
+        <Slider
+          id="arc-width"
+          min={0}
+          max={360}
+          step={1}
+          value={[config.arcWidth]}
+          onValueChange={([arcWidth]) => onChange({ ...config, arcWidth })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex justify-between">
+          <Label htmlFor="radial-offset">Radial Offset</Label>
+          <span className="text-sm text-muted-foreground">{config.radialOffset}px</span>
+        </div>
+        <Slider
+          id="radial-offset"
+          min={-100}
+          max={100}
+          step={1}
+          value={[config.radialOffset]}
+          onValueChange={([radialOffset]) => onChange({ ...config, radialOffset })}
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="text-color">Text Color</Label>
         <div className="flex gap-2">
           <Input
