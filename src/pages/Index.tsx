@@ -351,7 +351,7 @@ const Index = () => {
         </div>
 
         {/* Left Panel - Layer Accordion - Order 2 on mobile, 1 on desktop */}
-        <div className="w-full md:w-80 border-b md:border-b-0 md:border-r bg-[hsl(var(--editor-panel))] overflow-auto order-2 md:order-1">
+        <div className="w-full md:w-80 border-b md:border-b-0 md:border-r bg-[hsl(var(--editor-panel))] md:overflow-auto order-2 md:order-1">
           <LayerAccordion
             layers={layers}
             config={config}
@@ -370,7 +370,7 @@ const Index = () => {
 
         {/* Right Panel - Presets (desktop only) + Export - Order 3 on mobile and desktop */}
         {config.image && (
-          <div className="w-full md:w-80 border-t md:border-t-0 md:border-l bg-[hsl(var(--editor-panel))] overflow-auto order-3">
+          <div className="w-full md:w-80 border-t md:border-t-0 md:border-l bg-[hsl(var(--editor-panel))] md:overflow-auto order-3">
             <div className="p-4 space-y-4">
               {/* Hide presets on mobile */}
               <div className="hidden md:block">
