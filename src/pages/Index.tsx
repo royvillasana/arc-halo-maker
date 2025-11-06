@@ -310,42 +310,44 @@ const Index = () => {
         {/* Center Panel - Canvas */}
         <div className="relative flex-1 flex flex-col">
           <div className="flex-1 p-4 flex items-center justify-center overflow-auto">
-            {config.image ? (
-              <PhotoshopCanvas
-                layers={layers}
-                canvasSize={canvasSize}
-                zoom={zoom}
-                panX={panX}
-                panY={panY}
-                activeTool={activeTool}
-                selectedLayerId={selectedLayerId}
-                eyedropperMode={eyedropperMode}
-                onPanChange={(x, y) => {
-                  setPanX(x);
-                  setPanY(y);
-                }}
-                onImageTransform={handleCanvasImageDrag}
-                onColorPick={handleColorPick}
-              />
-            ) : (
-              <Card className="w-full h-full flex flex-col items-center justify-center text-center text-muted-foreground gap-4">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  className="hidden"
+            <div className="w-full h-full max-w-[800px] max-h-[800px] flex items-center justify-center">
+              {config.image ? (
+                <PhotoshopCanvas
+                  layers={layers}
+                  canvasSize={canvasSize}
+                  zoom={zoom}
+                  panX={panX}
+                  panY={panY}
+                  activeTool={activeTool}
+                  selectedLayerId={selectedLayerId}
+                  eyedropperMode={eyedropperMode}
+                  onPanChange={(x, y) => {
+                    setPanX(x);
+                    setPanY(y);
+                  }}
+                  onImageTransform={handleCanvasImageDrag}
+                  onColorPick={handleColorPick}
                 />
-                <Button
-                  size="lg"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="mr-2 h-5 w-5" />
-                  Upload Image
-                </Button>
-                <p className="text-sm">Upload an image to get started</p>
-              </Card>
-            )}
+              ) : (
+                <Card className="w-full h-full flex flex-col items-center justify-center text-center text-muted-foreground gap-4">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  <Button
+                    size="lg"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="mr-2 h-5 w-5" />
+                    Upload Image
+                  </Button>
+                  <p className="text-sm">Upload an image to get started</p>
+                </Card>
+              )}
+            </div>
           </div>
           
           {/* Toolbar - Always at bottom */}
