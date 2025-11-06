@@ -12,6 +12,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
+import logo from '@/assets/logo.png';
 
 const Index = () => {
   const [config, setConfig] = useState<AvatarConfig>(defaultAvatarConfig);
@@ -285,7 +286,10 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="container mx-auto py-4 px-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Photoshop-Style Avatar Editor</h1>
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Logo" className="h-10 w-auto" />
+            <h1 className="text-2xl font-bold">Photoshop-Style Avatar Editor</h1>
+          </div>
           <ThemeToggle />
         </div>
       </header>
