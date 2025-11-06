@@ -80,6 +80,12 @@ const Index = () => {
         opacity: 1,
         zIndex: 2,
         data: {
+          hue: config.ribbon.hue,
+          saturation: config.ribbon.saturation,
+          brightness: config.ribbon.brightness,
+          contrast: config.ribbon.contrast,
+          scale: config.ribbon.scale,
+          rotation: config.ribbon.rotation,
           color: config.ribbon.color,
           thickness: config.ribbon.thickness,
           startAngle: config.ribbon.startAngle,

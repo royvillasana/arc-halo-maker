@@ -28,7 +28,7 @@ export const RibbonControls = ({ config, onChange }: RibbonControlsProps) => {
             <Label>Ribbon Style</Label>
             <Select
               value={config.style}
-              onValueChange={(value: 'arc' | 'badge') =>
+              onValueChange={(value: 'arc' | 'badge' | 'image') =>
                 onChange({ ...config, style: value })
               }
             >
@@ -36,33 +36,104 @@ export const RibbonControls = ({ config, onChange }: RibbonControlsProps) => {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="image">Image (Customizable)</SelectItem>
                 <SelectItem value="arc">Arc (Curved)</SelectItem>
                 <SelectItem value="badge">Badge (Pill)</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Ribbon Color</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                value={config.color}
-                onChange={(e) => onChange({ ...config, color: e.target.value })}
-                className="w-16 h-10 p-1 cursor-pointer"
-              />
-              <Input
-                type="text"
-                value={config.color}
-                onChange={(e) => onChange({ ...config, color: e.target.value })}
-                className="flex-1"
-                placeholder="#57C785"
-              />
-            </div>
-          </div>
+          {config.style === 'image' && (
+            <>
+              <div className="space-y-2">
+                <Label>Hue: {config.hue}°</Label>
+                <Slider
+                  value={[config.hue]}
+                  onValueChange={([value]) => onChange({ ...config, hue: value })}
+                  min={0}
+                  max={360}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Saturation: {config.saturation}%</Label>
+                <Slider
+                  value={[config.saturation]}
+                  onValueChange={([value]) => onChange({ ...config, saturation: value })}
+                  min={0}
+                  max={200}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Brightness: {config.brightness}%</Label>
+                <Slider
+                  value={[config.brightness]}
+                  onValueChange={([value]) => onChange({ ...config, brightness: value })}
+                  min={0}
+                  max={200}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Contrast: {config.contrast}%</Label>
+                <Slider
+                  value={[config.contrast]}
+                  onValueChange={([value]) => onChange({ ...config, contrast: value })}
+                  min={0}
+                  max={200}
+                  step={1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Scale: {config.scale.toFixed(2)}x</Label>
+                <Slider
+                  value={[config.scale]}
+                  onValueChange={([value]) => onChange({ ...config, scale: value })}
+                  min={0.5}
+                  max={2}
+                  step={0.1}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Rotation: {config.rotation}°</Label>
+                <Slider
+                  value={[config.rotation]}
+                  onValueChange={([value]) => onChange({ ...config, rotation: value })}
+                  min={-180}
+                  max={180}
+                  step={1}
+                />
+              </div>
+            </>
+          )}
 
           {config.style === 'badge' && (
             <>
+              <div className="space-y-2">
+                <Label>Ribbon Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    value={config.color}
+                    onChange={(e) => onChange({ ...config, color: e.target.value })}
+                    className="w-16 h-10 p-1 cursor-pointer"
+                  />
+                  <Input
+                    type="text"
+                    value={config.color}
+                    onChange={(e) => onChange({ ...config, color: e.target.value })}
+                    className="flex-1"
+                    placeholder="#57C785"
+                  />
+                </div>
+              </div>
+
               <div className="flex items-center justify-between">
                 <Label htmlFor="use-gradient">Use Gradient</Label>
                 <Switch
@@ -111,6 +182,25 @@ export const RibbonControls = ({ config, onChange }: RibbonControlsProps) => {
 
           {config.style === 'arc' && (
             <>
+              <div className="space-y-2">
+                <Label>Ribbon Color</Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="color"
+                    value={config.color}
+                    onChange={(e) => onChange({ ...config, color: e.target.value })}
+                    className="w-16 h-10 p-1 cursor-pointer"
+                  />
+                  <Input
+                    type="text"
+                    value={config.color}
+                    onChange={(e) => onChange({ ...config, color: e.target.value })}
+                    className="flex-1"
+                    placeholder="#57C785"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label>Thickness: {config.thickness}%</Label>
                 <Slider

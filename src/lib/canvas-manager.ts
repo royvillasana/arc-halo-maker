@@ -9,11 +9,29 @@ export class CanvasManager {
   private panX: number = 0;
   private panY: number = 0;
 
+  private ribbonImage: HTMLImageElement | null = null;
+  private ribbonImageLoaded: boolean = false;
+
   constructor(canvas: HTMLCanvasElement, canvasSize: number = 800) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     this.canvasSize = canvasSize;
     this.setupCanvas();
+    this.loadRibbonImage();
+  }
+
+  private loadRibbonImage() {
+    this.ribbonImage = new Image();
+    this.ribbonImage.onload = () => {
+      this.ribbonImageLoaded = true;
+      this.render();
+    };
+    // Import the ribbon image
+    import('@/assets/ribbon.png').then(module => {
+      if (this.ribbonImage) {
+        this.ribbonImage.src = module.default;
+      }
+    });
   }
 
   private setupCanvas() {
@@ -149,7 +167,10 @@ export class CanvasManager {
 
     this.ctx.save();
 
-    if (layer.data.style === 'badge') {
+    if (layer.data.style === 'image') {
+      // Render image-based ribbon with color filters
+      this.renderImageStyle(layer, centerX, centerY, radius);
+    } else if (layer.data.style === 'badge') {
       // Render pill-shaped badge
       this.renderBadgeStyle(layer, centerX, centerY);
     } else {
@@ -158,6 +179,121 @@ export class CanvasManager {
     }
 
     this.ctx.restore();
+  }
+
+  private renderImageStyle(layer: RibbonLayer, centerX: number, centerY: number, radius: number) {
+    if (!this.ribbonImage || !this.ribbonImageLoaded) return;
+
+    this.ctx.save();
+
+    // Apply CSS-like filters using canvas manipulation
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = this.ribbonImage.width;
+    tempCanvas.height = this.ribbonImage.height;
+    const tempCtx = tempCanvas.getContext('2d')!;
+
+    // Draw original image
+    tempCtx.drawImage(this.ribbonImage, 0, 0);
+
+    // Get image data for color manipulation
+    const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+    const data = imageData.data;
+
+    // Apply hue, saturation, brightness, contrast
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const a = data[i + 3];
+
+      if (a === 0) continue; // Skip transparent pixels
+
+      // Convert to HSL
+      const hsl = this.rgbToHsl(r, g, b);
+
+      // Apply adjustments
+      hsl[0] = (hsl[0] + layer.data.hue / 360) % 1;
+      hsl[1] = Math.max(0, Math.min(1, hsl[1] * (layer.data.saturation / 100)));
+      hsl[2] = Math.max(0, Math.min(1, hsl[2] * (layer.data.brightness / 100)));
+
+      // Convert back to RGB
+      const rgb = this.hslToRgb(hsl[0], hsl[1], hsl[2]);
+
+      // Apply contrast
+      const contrast = layer.data.contrast / 100;
+      const factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
+
+      data[i] = Math.max(0, Math.min(255, factor * (rgb[0] - 128) + 128));
+      data[i + 1] = Math.max(0, Math.min(255, factor * (rgb[1] - 128) + 128));
+      data[i + 2] = Math.max(0, Math.min(255, factor * (rgb[2] - 128) + 128));
+    }
+
+    tempCtx.putImageData(imageData, 0, 0);
+
+    // Calculate dimensions to fit the circular canvas
+    const imageSize = radius * 2 * layer.data.scale;
+    const x = centerX - imageSize / 2;
+    const y = centerY - imageSize / 2;
+
+    // Apply rotation
+    this.ctx.translate(centerX, centerY);
+    this.ctx.rotate((layer.data.rotation * Math.PI) / 180);
+    this.ctx.translate(-centerX, -centerY);
+
+    // Draw the filtered image
+    this.ctx.drawImage(tempCanvas, x, y, imageSize, imageSize);
+
+    this.ctx.restore();
+  }
+
+  private rgbToHsl(r: number, g: number, b: number): [number, number, number] {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0, s = 0;
+    const l = (max + min) / 2;
+
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+        case g: h = ((b - r) / d + 2) / 6; break;
+        case b: h = ((r - g) / d + 4) / 6; break;
+      }
+    }
+
+    return [h, s, l];
+  }
+
+  private hslToRgb(h: number, s: number, l: number): [number, number, number] {
+    let r, g, b;
+
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p: number, q: number, t: number) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1/6) return p + (q - p) * 6 * t;
+        if (t < 1/2) return q;
+        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+        return p;
+      };
+
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+
+      r = hue2rgb(p, q, h + 1/3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return [r * 255, g * 255, b * 255];
   }
 
   private renderBadgeStyle(layer: RibbonLayer, centerX: number, centerY: number) {
@@ -352,7 +488,7 @@ export class CanvasManager {
       // Render straight text for badge
       this.renderBadgeText(layer, text, fontSize, centerX, centerY, ribbonLayer);
     } else {
-      // Render curved text for arc
+      // Render curved text for arc and image styles
       this.renderCurvedText(layer, text, fontSize, centerX, centerY, ribbonLayer);
     }
 
