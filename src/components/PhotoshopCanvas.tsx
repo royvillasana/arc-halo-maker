@@ -152,8 +152,8 @@ export const PhotoshopCanvas = ({
   const ribbonLayer = layers.find(l => l.type === 'ribbon') as RibbonLayer | undefined;
 
   return (
-    <div className="flex items-center justify-center w-full h-full bg-[hsl(var(--canvas-bg))] rounded-lg border overflow-hidden">
-      <div id="avatar-canvas-container" className="relative" style={{ width: '800px', height: '800px' }}>
+    <div className="flex items-center justify-center w-full h-full bg-[hsl(var(--canvas-bg))] rounded-lg border">
+      <div id="avatar-canvas-container" className="relative w-full aspect-square max-w-[800px] max-h-[800px]">
         <canvas
           ref={canvasRef}
           className={`w-full h-full rounded-lg shadow-xl ${getCursorStyle()}`}
