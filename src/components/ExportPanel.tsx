@@ -33,27 +33,30 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
     setIsExporting(true);
     try {
       // Find the canvas container
-      const canvasContainer = document.querySelector('.relative') as HTMLElement;
+      const canvasContainer = document.getElementById('avatar-canvas-container') as HTMLElement;
       if (!canvasContainer) {
         toast.error('Canvas not found');
+        setIsExporting(false);
         return;
       }
 
-      // Capture the canvas with html2canvas
+      // Capture the canvas with html2canvas at the selected size
       const canvas = await html2canvas(canvasContainer, {
         backgroundColor: null,
-        scale: selectedSize / 800, // Scale to desired size
+        scale: selectedSize / 800, // Scale to desired export size
         logging: false,
         useCORS: true,
+        width: 800,
+        height: 800,
       });
 
       // Download the image
       const link = document.createElement('a');
       link.download = `avatar-${selectedSize}x${selectedSize}.${format}`;
-      link.href = canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', 0.95);
+      link.href = canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', 1.0);
       link.click();
 
-      toast.success(`Exported avatar as ${format.toUpperCase()}`);
+      toast.success(`Avatar exported as ${format.toUpperCase()} (${selectedSize}x${selectedSize})`);
     } catch (error) {
       console.error('Export error:', error);
       toast.error('Failed to export avatar');

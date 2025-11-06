@@ -153,7 +153,7 @@ export const PhotoshopCanvas = ({
 
   return (
     <div className="flex items-center justify-center w-full h-full bg-[hsl(var(--canvas-bg))] rounded-lg border overflow-hidden">
-      <div className="relative" style={{ width: '800px', height: '800px' }}>
+      <div id="avatar-canvas-container" className="relative" style={{ width: '800px', height: '800px' }}>
         <canvas
           ref={canvasRef}
           className={`w-full h-full rounded-lg shadow-xl ${getCursorStyle()}`}
