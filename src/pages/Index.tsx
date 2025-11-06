@@ -310,7 +310,7 @@ const Index = () => {
         {/* Center Panel - Canvas */}
         <div className="flex-1 flex flex-col">
           <div className="flex-1 p-4 flex items-center justify-center overflow-auto min-h-0">
-            <div className="w-full h-full max-w-[800px] max-h-[800px] flex items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center p-4">
               {config.image ? (
                 <PhotoshopCanvas
                   layers={layers}
@@ -329,7 +329,7 @@ const Index = () => {
                   onColorPick={handleColorPick}
                 />
               ) : (
-                <Card className="w-full h-full flex flex-col items-center justify-center text-center text-muted-foreground gap-4">
+                <Card className="w-full max-w-[800px] aspect-square flex flex-col items-center justify-center text-center text-muted-foreground gap-4">
                   <input
                     ref={fileInputRef}
                     type="file"
