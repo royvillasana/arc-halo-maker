@@ -35,6 +35,8 @@ export interface RibbonLayer extends Layer {
     style: 'arc' | 'badge';
     badgeRotation: number;
     badgeOffsetY: number;
+    useGradient: boolean;
+    gradientFadePercent: number;
   };
 }
 

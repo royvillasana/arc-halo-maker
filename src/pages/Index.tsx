@@ -91,6 +91,8 @@ const Index = () => {
           style: config.ribbon.style,
           badgeRotation: config.ribbon.badgeRotation,
           badgeOffsetY: config.ribbon.badgeOffsetY,
+          useGradient: config.ribbon.useGradient,
+          gradientFadePercent: config.ribbon.gradientFadePercent,
         },
       };
       newLayers.push(ribbonLayer);

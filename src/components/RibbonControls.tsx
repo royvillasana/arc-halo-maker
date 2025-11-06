@@ -56,13 +56,35 @@ export const RibbonControls = ({ config, onChange }: RibbonControlsProps) => {
                 value={config.color}
                 onChange={(e) => onChange({ ...config, color: e.target.value })}
                 className="flex-1"
-                placeholder="#35b76f"
+                placeholder="#57C785"
               />
             </div>
           </div>
 
           {config.style === 'badge' && (
             <>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="use-gradient">Use Gradient</Label>
+                <Switch
+                  id="use-gradient"
+                  checked={config.useGradient}
+                  onCheckedChange={(useGradient) => onChange({ ...config, useGradient })}
+                />
+              </div>
+
+              {config.useGradient && (
+                <div className="space-y-2">
+                  <Label>Edge Fade: {config.gradientFadePercent}%</Label>
+                  <Slider
+                    value={[config.gradientFadePercent]}
+                    onValueChange={([value]) => onChange({ ...config, gradientFadePercent: value })}
+                    min={0}
+                    max={50}
+                    step={1}
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label>Badge Rotation: {config.badgeRotation}°</Label>
                 <Slider
@@ -79,7 +101,7 @@ export const RibbonControls = ({ config, onChange }: RibbonControlsProps) => {
                 <Slider
                   value={[config.badgeOffsetY]}
                   onValueChange={([value]) => onChange({ ...config, badgeOffsetY: value })}
-                  min={-400}
+                  min={200}
                   max={400}
                   step={5}
                 />
@@ -123,36 +145,6 @@ export const RibbonControls = ({ config, onChange }: RibbonControlsProps) => {
               </div>
             </>
           )}
-
-          <div className="space-y-2">
-            <Label>Border Color</Label>
-            <div className="flex gap-2">
-              <Input
-                type="color"
-                value={config.borderColor}
-                onChange={(e) => onChange({ ...config, borderColor: e.target.value })}
-                className="w-16 h-10 p-1 cursor-pointer"
-              />
-              <Input
-                type="text"
-                value={config.borderColor}
-                onChange={(e) => onChange({ ...config, borderColor: e.target.value })}
-                className="flex-1"
-                placeholder="#ffffff"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Border Width: {config.borderWidth}px</Label>
-            <Slider
-              value={[config.borderWidth]}
-              onValueChange={([value]) => onChange({ ...config, borderWidth: value })}
-              min={0}
-              max={10}
-              step={1}
-            />
-          </div>
 
           <div className="space-y-2">
             <Label>Shadow Blur: {config.shadowBlur}px</Label>

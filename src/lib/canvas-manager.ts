@@ -211,7 +211,25 @@ export class CanvasManager {
     this.ctx.quadraticCurveTo(-badgeWidth / 2, -badgeHeight / 2, -badgeWidth / 2 + borderRadius, -badgeHeight / 2);
     this.ctx.closePath();
 
-    this.ctx.fillStyle = layer.data.color;
+    // Fill with gradient or solid color
+    if (layer.data.useGradient) {
+      const gradient = this.ctx.createLinearGradient(-badgeWidth / 2, 0, badgeWidth / 2, 0);
+      const fadePercent = layer.data.gradientFadePercent / 100;
+      const solidStart = fadePercent;
+      const solidEnd = 1 - fadePercent;
+      
+      // Parse the color to get RGB values
+      const color = layer.data.color;
+      gradient.addColorStop(0, this.hexToRgba(color, 0));
+      gradient.addColorStop(solidStart, this.hexToRgba(color, 1));
+      gradient.addColorStop(solidEnd, this.hexToRgba(color, 1));
+      gradient.addColorStop(1, this.hexToRgba(color, 0));
+      
+      this.ctx.fillStyle = gradient;
+    } else {
+      this.ctx.fillStyle = layer.data.color;
+    }
+    
     this.ctx.fill();
 
     // Draw border
@@ -223,6 +241,13 @@ export class CanvasManager {
     }
 
     this.ctx.restore();
+  }
+
+  private hexToRgba(hex: string, alpha: number): string {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   private renderArcStyle(layer: RibbonLayer, centerX: number, centerY: number, radius: number) {
