@@ -369,15 +369,17 @@ const Index = () => {
         </div>
 
         {/* Right Panel - Export */}
-        <div className="w-80 border-l bg-[hsl(var(--editor-panel))] overflow-auto">
-          <div className="p-4 space-y-4">
-            <PresetList onSelectPreset={handlePresetSelect} />
+        {config.image && (
+          <div className="w-80 border-l bg-[hsl(var(--editor-panel))] overflow-auto">
+            <div className="p-4 space-y-4">
+              <PresetList onSelectPreset={handlePresetSelect} />
 
-            <Separator />
+              <Separator />
 
-            <ExportPanel config={config} />
+              <ExportPanel config={config} />
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
