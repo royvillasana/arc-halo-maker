@@ -153,10 +153,10 @@ export const PhotoshopCanvas = ({
 
   return (
     <div className="flex items-center justify-center w-full h-full bg-[hsl(var(--canvas-bg))] rounded-lg border overflow-hidden">
-      <div className="relative" style={{ maxHeight: '600px' }}>
+      <div className="relative" style={{ width: '400px', height: '400px' }}>
         <canvas
           ref={canvasRef}
-          className={`max-w-full h-auto rounded-lg shadow-xl ${getCursorStyle()}`}
+          className={`w-full h-full rounded-lg shadow-xl ${getCursorStyle()}`}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -167,7 +167,6 @@ export const PhotoshopCanvas = ({
           <svg
             className="absolute top-0 left-0 w-full h-full pointer-events-none"
             viewBox={`0 0 ${canvasSize} ${canvasSize}`}
-            style={{ maxHeight: '600px' }}
           >
             <defs>
               <path
