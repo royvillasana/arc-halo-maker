@@ -5,8 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { AvatarConfig } from '@/types/avatar';
-import { renderAvatar, downloadCanvas } from '@/lib/canvas-utils';
 import { toast } from 'sonner';
+import html2canvas from 'html2canvas';
 
 interface ExportPanelProps {
   config: AvatarConfig;
@@ -22,24 +22,44 @@ const exportSizes = [
 export const ExportPanel = ({ config }: ExportPanelProps) => {
   const [selectedSize, setSelectedSize] = useState(800);
   const [format, setFormat] = useState<'png' | 'jpg'>('png');
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if (!config.image) {
       toast.error('Please upload an image first');
       return;
     }
 
-    const canvas = document.createElement('canvas');
-    const img = new Image();
-    
-    img.onload = () => {
-      renderAvatar(canvas, config, selectedSize);
-      const filename = `avatar-${selectedSize}x${selectedSize}.${format}`;
-      downloadCanvas(canvas, filename, format);
-      toast.success(`Exported ${filename}`);
-    };
-    
-    img.src = config.image;
+    setIsExporting(true);
+    try {
+      // Find the canvas container
+      const canvasContainer = document.querySelector('.relative') as HTMLElement;
+      if (!canvasContainer) {
+        toast.error('Canvas not found');
+        return;
+      }
+
+      // Capture the canvas with html2canvas
+      const canvas = await html2canvas(canvasContainer, {
+        backgroundColor: null,
+        scale: selectedSize / 800, // Scale to desired size
+        logging: false,
+        useCORS: true,
+      });
+
+      // Download the image
+      const link = document.createElement('a');
+      link.download = `avatar-${selectedSize}x${selectedSize}.${format}`;
+      link.href = canvas.toDataURL(format === 'png' ? 'image/png' : 'image/jpeg', 0.95);
+      link.click();
+
+      toast.success(`Exported avatar as ${format.toUpperCase()}`);
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export avatar');
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -78,9 +98,9 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
         </Select>
       </div>
 
-      <Button onClick={handleExport} className="w-full" size="lg">
+      <Button onClick={handleExport} className="w-full" size="lg" disabled={isExporting}>
         <Download className="mr-2 h-4 w-4" />
-        Download Avatar
+        {isExporting ? 'Exporting...' : 'Download Avatar'}
       </Button>
     </Card>
   );
