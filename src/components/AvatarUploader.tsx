@@ -2,14 +2,26 @@ import { useRef } from 'react';
 import { Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 
 interface AvatarUploaderProps {
   onImageSelect: (imageUrl: string) => void;
   currentImage: string | null;
+  imageScale: number;
+  imageX: number;
+  imageY: number;
+  onImageTransform: (scale: number, x: number, y: number) => void;
 }
 
-export const AvatarUploader = ({ onImageSelect, currentImage }: AvatarUploaderProps) => {
+export const AvatarUploader = ({ 
+  onImageSelect, 
+  currentImage, 
+  imageScale, 
+  imageX, 
+  imageY, 
+  onImageTransform 
+}: AvatarUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,13 +81,56 @@ export const AvatarUploader = ({ onImageSelect, currentImage }: AvatarUploaderPr
           {currentImage ? 'Change Image' : 'Upload Image'}
         </Button>
         {currentImage && (
-          <div className="rounded-lg border bg-muted p-2">
-            <img
-              src={currentImage}
-              alt="Preview"
-              className="w-full h-32 object-cover rounded"
-            />
-          </div>
+          <>
+            <div className="rounded-lg border bg-muted p-2">
+              <img
+                src={currentImage}
+                alt="Preview"
+                className="w-full h-32 object-cover rounded"
+              />
+            </div>
+            
+            <div className="space-y-4 pt-2">
+              <div className="space-y-2">
+                <Label>Zoom</Label>
+                <Slider
+                  value={[imageScale]}
+                  onValueChange={([value]) => onImageTransform(value, imageX, imageY)}
+                  min={0.5}
+                  max={2}
+                  step={0.01}
+                  className="w-full"
+                />
+                <div className="text-xs text-muted-foreground text-right">
+                  {Math.round(imageScale * 100)}%
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Position X</Label>
+                <Slider
+                  value={[imageX]}
+                  onValueChange={([value]) => onImageTransform(imageScale, value, imageY)}
+                  min={-200}
+                  max={200}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Position Y</Label>
+                <Slider
+                  value={[imageY]}
+                  onValueChange={([value]) => onImageTransform(imageScale, imageX, value)}
+                  min={-200}
+                  max={200}
+                  step={1}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>

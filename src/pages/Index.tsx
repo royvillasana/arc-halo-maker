@@ -18,6 +18,10 @@ const Index = () => {
     setConfig((prev) => ({ ...prev, image: imageUrl }));
   };
 
+  const handleImageTransform = (scale: number, x: number, y: number) => {
+    setConfig((prev) => ({ ...prev, imageScale: scale, imageX: x, imageY: y }));
+  };
+
   const handleRibbonChange = (ribbon: AvatarConfig['ribbon']) => {
     setConfig((prev) => ({ ...prev, ribbon }));
   };
@@ -61,6 +65,10 @@ const Index = () => {
                 <AvatarUploader
                   onImageSelect={handleImageSelect}
                   currentImage={config.image}
+                  imageScale={config.imageScale}
+                  imageX={config.imageX}
+                  imageY={config.imageY}
+                  onImageTransform={handleImageTransform}
                 />
 
                 <Separator />
