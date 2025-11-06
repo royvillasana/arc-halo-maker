@@ -262,14 +262,48 @@ export class CanvasManager {
     if (layer.data.shadowBlur > 0) {
       this.ctx.shadowBlur = layer.data.shadowBlur;
       this.ctx.shadowColor = `rgba(0, 0, 0, ${layer.data.shadowOpacity})`;
+      this.ctx.shadowOffsetY = 2;
     }
 
-    // Draw ribbon arc
-    this.ctx.beginPath();
-    this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, startAngle, endAngle);
-    this.ctx.lineWidth = ribbonThickness;
-    this.ctx.strokeStyle = layer.data.color;
-    this.ctx.stroke();
+    if (layer.data.useGradient) {
+      // Draw ribbon with gradient fade effect
+      const fadePercent = layer.data.gradientFadePercent / 100;
+      const arcLength = layer.data.arcWidth;
+      const fadeAngle = arcLength * fadePercent;
+      const segments = 100; // Number of segments for smooth gradient
+      
+      for (let i = 0; i < segments; i++) {
+        const progress = i / segments;
+        const currentAngle = startAngle + (endAngle - startAngle) * progress;
+        const nextAngle = startAngle + (endAngle - startAngle) * (i + 1) / segments;
+        
+        // Calculate opacity based on position
+        let opacity = 1;
+        const angleFromStart = (currentAngle - startAngle) * (180 / Math.PI);
+        const angleFromEnd = (endAngle - currentAngle) * (180 / Math.PI);
+        
+        if (angleFromStart < fadeAngle) {
+          // Fade in at start
+          opacity = angleFromStart / fadeAngle;
+        } else if (angleFromEnd < fadeAngle) {
+          // Fade out at end
+          opacity = angleFromEnd / fadeAngle;
+        }
+        
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, currentAngle, nextAngle);
+        this.ctx.lineWidth = ribbonThickness;
+        this.ctx.strokeStyle = this.hexToRgba(layer.data.color, opacity);
+        this.ctx.stroke();
+      }
+    } else {
+      // Draw solid ribbon arc
+      this.ctx.beginPath();
+      this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, startAngle, endAngle);
+      this.ctx.lineWidth = ribbonThickness;
+      this.ctx.strokeStyle = layer.data.color;
+      this.ctx.stroke();
+    }
 
     // Draw ribbon border
     if (layer.data.borderWidth > 0) {
