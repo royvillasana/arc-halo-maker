@@ -284,19 +284,17 @@ export class CanvasManager {
     const anglePerPixel = 1 / textRadius;
     const totalAngle = totalWidth * anglePerPixel;
 
-    // Calculate the center angle of the ribbon arc
-    const ribbonCenterAngle = (ribbonLayer.data.startAngle + ribbonLayer.data.arcWidth / 2) * Math.PI / 180;
-    
-    // Start text centered on the ribbon arc
-    const startAngle = ribbonCenterAngle - totalAngle / 2;
+    const startAngle =
+      (ribbonLayer.data.startAngle * Math.PI) / 180 + 
+      (ribbonLayer.data.arcWidth * Math.PI) / 360 -
+      totalAngle / 2;
 
     // Draw each character
     let currentAngle = startAngle;
     text.split('').forEach((char, i) => {
       this.ctx.save();
       this.ctx.translate(centerX, centerY);
-      // Rotate to position the character and orient it upright (subtract Math.PI / 2 to make text read top-to-bottom relative to radius)
-      this.ctx.rotate(currentAngle + (charWidths[i] * anglePerPixel) / 2 - Math.PI / 2);
+      this.ctx.rotate(currentAngle + (charWidths[i] * anglePerPixel) / 2 + Math.PI / 2);
       this.ctx.translate(0, -textRadius - layer.data.radialOffset);
 
       // Draw text stroke
