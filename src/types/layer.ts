@@ -24,12 +24,6 @@ export interface ImageLayer extends Layer {
 export interface RibbonLayer extends Layer {
   type: 'ribbon';
   data: {
-    hue: number;
-    saturation: number;
-    brightness: number;
-    contrast: number;
-    scale: number;
-    rotation: number;
     color: string;
     thickness: number;
     startAngle: number;
@@ -38,9 +32,6 @@ export interface RibbonLayer extends Layer {
     borderWidth: number;
     shadowBlur: number;
     shadowOpacity: number;
-    style: 'arc' | 'badge' | 'image';
-    badgeRotation: number;
-    badgeOffsetY: number;
     useGradient: boolean;
     gradientFadePercent: number;
   };

@@ -1,13 +1,5 @@
 export interface RibbonConfig {
   visible: boolean;
-  // Image-based ribbon with color adjustments
-  hue: number; // 0-360 degrees
-  saturation: number; // 0-200 (100 is normal)
-  brightness: number; // 0-200 (100 is normal)
-  contrast: number; // 0-200 (100 is normal)
-  scale: number; // scale of the ribbon image
-  rotation: number; // rotation in degrees
-  // Legacy color for backward compatibility
   color: string;
   thickness: number; // 0-40 as percentage of radius
   startAngle: number; // 0-360 degrees
@@ -16,10 +8,6 @@ export interface RibbonConfig {
   borderWidth: number;
   shadowBlur: number;
   shadowOpacity: number;
-  // Pill badge style
-  style: 'arc' | 'badge' | 'image';
-  badgeRotation: number; // rotation in degrees
-  badgeOffsetY: number; // vertical offset from center
   useGradient: boolean;
   gradientFadePercent: number; // percentage of fade at edges (0-50)
 }
@@ -65,12 +53,6 @@ export const defaultAvatarConfig: AvatarConfig = {
   imageY: 0,
   ribbon: {
     visible: true,
-    hue: 0,
-    saturation: 100,
-    brightness: 100,
-    contrast: 100,
-    scale: 1,
-    rotation: 0,
     color: '#57C785',
     thickness: 20,
     startAngle: 215,
@@ -79,9 +61,6 @@ export const defaultAvatarConfig: AvatarConfig = {
     borderWidth: 0,
     shadowBlur: 6,
     shadowOpacity: 0.2,
-    style: 'image',
-    badgeRotation: 0,
-    badgeOffsetY: 365,
     useGradient: true,
     gradientFadePercent: 13,
   },
@@ -110,12 +89,6 @@ export const presets: Preset[] = [
     config: {
       ribbon: {
         visible: true,
-        hue: 0,
-        saturation: 100,
-        brightness: 100,
-        contrast: 100,
-        scale: 1,
-        rotation: 0,
         color: '#57C785',
         thickness: 20,
         startAngle: 215,
@@ -124,9 +97,6 @@ export const presets: Preset[] = [
         borderWidth: 0,
         shadowBlur: 6,
         shadowOpacity: 0.2,
-        style: 'image',
-        badgeRotation: 0,
-        badgeOffsetY: 365,
         useGradient: true,
         gradientFadePercent: 13,
       },
@@ -148,12 +118,6 @@ export const presets: Preset[] = [
     config: {
       ribbon: {
         visible: true,
-        hue: 210,
-        saturation: 100,
-        brightness: 100,
-        contrast: 100,
-        scale: 1,
-        rotation: 0,
         color: '#1D4ED8',
         thickness: 20,
         startAngle: 215,
@@ -162,9 +126,6 @@ export const presets: Preset[] = [
         borderWidth: 0,
         shadowBlur: 6,
         shadowOpacity: 0.2,
-        style: 'image',
-        badgeRotation: 0,
-        badgeOffsetY: 365,
         useGradient: true,
         gradientFadePercent: 13,
       },
@@ -186,12 +147,6 @@ export const presets: Preset[] = [
     config: {
       ribbon: {
         visible: true,
-        hue: 270,
-        saturation: 100,
-        brightness: 100,
-        contrast: 100,
-        scale: 1,
-        rotation: 0,
         color: '#6D28D9',
         thickness: 20,
         startAngle: 215,
@@ -200,9 +155,35 @@ export const presets: Preset[] = [
         borderWidth: 0,
         shadowBlur: 6,
         shadowOpacity: 0.2,
-        style: 'image',
-        badgeRotation: 0,
-        badgeOffsetY: 365,
+        useGradient: true,
+        gradientFadePercent: 13,
+      },
+      text: {
+        content: '#FREELANCE',
+        textCase: 'upper',
+        fontFamily: 'Arial',
+        fontSize: 16,
+        letterSpacing: 1,
+        radialOffset: 0,
+        color: '#ffffff',
+        strokeColor: '#000000',
+        strokeWidth: 0,
+      },
+    },
+  },
+  {
+    name: 'Available',
+    config: {
+      ribbon: {
+        visible: true,
+        color: '#EA580C',
+        thickness: 20,
+        startAngle: 215,
+        arcWidth: 150,
+        borderColor: '#ffffff',
+        borderWidth: 0,
+        shadowBlur: 6,
+        shadowOpacity: 0.2,
         useGradient: true,
         gradientFadePercent: 13,
       },

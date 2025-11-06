@@ -9,29 +9,11 @@ export class CanvasManager {
   private panX: number = 0;
   private panY: number = 0;
 
-  private ribbonImage: HTMLImageElement | null = null;
-  private ribbonImageLoaded: boolean = false;
-
   constructor(canvas: HTMLCanvasElement, canvasSize: number = 800) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     this.canvasSize = canvasSize;
     this.setupCanvas();
-    this.loadRibbonImage();
-  }
-
-  private loadRibbonImage() {
-    this.ribbonImage = new Image();
-    this.ribbonImage.onload = () => {
-      this.ribbonImageLoaded = true;
-      this.render();
-    };
-    // Import the ribbon image
-    import('@/assets/ribbon.png').then(module => {
-      if (this.ribbonImage) {
-        this.ribbonImage.src = module.default;
-      }
-    });
   }
 
   private setupCanvas() {
@@ -166,216 +148,7 @@ export class CanvasManager {
     const radius = this.canvasSize / 2;
 
     this.ctx.save();
-
-    if (layer.data.style === 'image') {
-      // Render image-based ribbon with color filters
-      this.renderImageStyle(layer, centerX, centerY, radius);
-    } else if (layer.data.style === 'badge') {
-      // Render pill-shaped badge
-      this.renderBadgeStyle(layer, centerX, centerY);
-    } else {
-      // Render traditional arc style
-      this.renderArcStyle(layer, centerX, centerY, radius);
-    }
-
-    this.ctx.restore();
-  }
-
-  private renderImageStyle(layer: RibbonLayer, centerX: number, centerY: number, radius: number) {
-    if (!this.ribbonImage || !this.ribbonImageLoaded) return;
-
-    this.ctx.save();
-
-    // Apply CSS-like filters using canvas manipulation
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = this.ribbonImage.width;
-    tempCanvas.height = this.ribbonImage.height;
-    const tempCtx = tempCanvas.getContext('2d')!;
-
-    // Draw original image
-    tempCtx.drawImage(this.ribbonImage, 0, 0);
-
-    // Get image data for color manipulation
-    const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
-    const data = imageData.data;
-
-    // Apply hue, saturation, brightness, contrast
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      const a = data[i + 3];
-
-      if (a === 0) continue; // Skip transparent pixels
-
-      // Convert to HSL
-      const hsl = this.rgbToHsl(r, g, b);
-
-      // Apply adjustments
-      hsl[0] = (hsl[0] + layer.data.hue / 360) % 1;
-      hsl[1] = Math.max(0, Math.min(1, hsl[1] * (layer.data.saturation / 100)));
-      hsl[2] = Math.max(0, Math.min(1, hsl[2] * (layer.data.brightness / 100)));
-
-      // Convert back to RGB
-      const rgb = this.hslToRgb(hsl[0], hsl[1], hsl[2]);
-
-      // Apply contrast
-      const contrast = layer.data.contrast / 100;
-      const factor = (259 * (contrast * 255 + 255)) / (255 * (259 - contrast * 255));
-
-      data[i] = Math.max(0, Math.min(255, factor * (rgb[0] - 128) + 128));
-      data[i + 1] = Math.max(0, Math.min(255, factor * (rgb[1] - 128) + 128));
-      data[i + 2] = Math.max(0, Math.min(255, factor * (rgb[2] - 128) + 128));
-    }
-
-    tempCtx.putImageData(imageData, 0, 0);
-
-    // Calculate dimensions to fit the circular canvas
-    const imageSize = radius * 2 * layer.data.scale;
-    const x = centerX - imageSize / 2;
-    const y = centerY - imageSize / 2;
-
-    // Apply rotation
-    this.ctx.translate(centerX, centerY);
-    this.ctx.rotate((layer.data.rotation * Math.PI) / 180);
-    this.ctx.translate(-centerX, -centerY);
-
-    // Draw the filtered image
-    this.ctx.drawImage(tempCanvas, x, y, imageSize, imageSize);
-
-    this.ctx.restore();
-  }
-
-  private rgbToHsl(r: number, g: number, b: number): [number, number, number] {
-    r /= 255;
-    g /= 255;
-    b /= 255;
-
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0, s = 0;
-    const l = (max + min) / 2;
-
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-
-      switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-        case g: h = ((b - r) / d + 2) / 6; break;
-        case b: h = ((r - g) / d + 4) / 6; break;
-      }
-    }
-
-    return [h, s, l];
-  }
-
-  private hslToRgb(h: number, s: number, l: number): [number, number, number] {
-    let r, g, b;
-
-    if (s === 0) {
-      r = g = b = l;
-    } else {
-      const hue2rgb = (p: number, q: number, t: number) => {
-        if (t < 0) t += 1;
-        if (t > 1) t -= 1;
-        if (t < 1/6) return p + (q - p) * 6 * t;
-        if (t < 1/2) return q;
-        if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-        return p;
-      };
-
-      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      const p = 2 * l - q;
-
-      r = hue2rgb(p, q, h + 1/3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
-    }
-
-    return [r * 255, g * 255, b * 255];
-  }
-
-  private renderBadgeStyle(layer: RibbonLayer, centerX: number, centerY: number) {
-    // Get text to calculate badge size
-    const textLayer = this.layers.find(l => l.type === 'text') as TextLayer;
-    if (!textLayer || !textLayer.data.content) return;
-
-    const text = this.formatText(textLayer.data.content, textLayer.data.textCase);
-    const fontSize = textLayer.data.fontSize;
-    const letterSpacing = textLayer.data.letterSpacing;
-    
-    this.ctx.font = `bold ${fontSize}px ${textLayer.data.fontFamily}`;
-    
-    // Calculate text width with letter spacing
-    const chars = text.split('');
-    const totalLetterSpacing = (chars.length - 1) * letterSpacing;
-    const textWidth = this.ctx.measureText(text).width + totalLetterSpacing;
-    
-    // Badge dimensions matching CSS: padding: 8px 20px
-    const paddingX = 20;
-    const paddingY = 8;
-    const badgeWidth = textWidth + paddingX * 2;
-    const badgeHeight = fontSize + paddingY * 2;
-    const borderRadius = badgeHeight / 2;
-
-    // Position at bottom (offsetY from center)
-    const x = centerX;
-    const y = centerY + layer.data.badgeOffsetY;
-
-    this.ctx.save();
-    this.ctx.translate(x, y);
-    this.ctx.rotate((layer.data.badgeRotation * Math.PI) / 180);
-
-    // Shadow matching CSS: box-shadow: 0 2px 6px rgba(0,0,0,0.2)
-    if (layer.data.shadowBlur > 0) {
-      this.ctx.shadowBlur = layer.data.shadowBlur;
-      this.ctx.shadowColor = `rgba(0, 0, 0, ${layer.data.shadowOpacity})`;
-      this.ctx.shadowOffsetY = 2;
-    }
-
-    // Draw rounded rectangle badge
-    this.ctx.beginPath();
-    this.ctx.moveTo(-badgeWidth / 2 + borderRadius, -badgeHeight / 2);
-    this.ctx.lineTo(badgeWidth / 2 - borderRadius, -badgeHeight / 2);
-    this.ctx.quadraticCurveTo(badgeWidth / 2, -badgeHeight / 2, badgeWidth / 2, -badgeHeight / 2 + borderRadius);
-    this.ctx.lineTo(badgeWidth / 2, badgeHeight / 2 - borderRadius);
-    this.ctx.quadraticCurveTo(badgeWidth / 2, badgeHeight / 2, badgeWidth / 2 - borderRadius, badgeHeight / 2);
-    this.ctx.lineTo(-badgeWidth / 2 + borderRadius, badgeHeight / 2);
-    this.ctx.quadraticCurveTo(-badgeWidth / 2, badgeHeight / 2, -badgeWidth / 2, badgeHeight / 2 - borderRadius);
-    this.ctx.lineTo(-badgeWidth / 2, -badgeHeight / 2 + borderRadius);
-    this.ctx.quadraticCurveTo(-badgeWidth / 2, -badgeHeight / 2, -badgeWidth / 2 + borderRadius, -badgeHeight / 2);
-    this.ctx.closePath();
-
-    // Fill with gradient or solid color
-    if (layer.data.useGradient) {
-      const gradient = this.ctx.createLinearGradient(-badgeWidth / 2, 0, badgeWidth / 2, 0);
-      const fadePercent = layer.data.gradientFadePercent / 100;
-      const solidStart = fadePercent;
-      const solidEnd = 1 - fadePercent;
-      
-      // Parse the color to get RGB values
-      const color = layer.data.color;
-      gradient.addColorStop(0, this.hexToRgba(color, 0));
-      gradient.addColorStop(solidStart, this.hexToRgba(color, 1));
-      gradient.addColorStop(solidEnd, this.hexToRgba(color, 1));
-      gradient.addColorStop(1, this.hexToRgba(color, 0));
-      
-      this.ctx.fillStyle = gradient;
-    } else {
-      this.ctx.fillStyle = layer.data.color;
-    }
-    
-    this.ctx.fill();
-
-    // Draw border
-    if (layer.data.borderWidth > 0) {
-      this.ctx.shadowBlur = 0;
-      this.ctx.strokeStyle = layer.data.borderColor;
-      this.ctx.lineWidth = layer.data.borderWidth;
-      this.ctx.stroke();
-    }
-
+    this.renderArcStyle(layer, centerX, centerY, radius);
     this.ctx.restore();
   }
 
@@ -477,63 +250,15 @@ export class CanvasManager {
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
 
-    // Find ribbon layer to determine style
+    // Find ribbon layer
     const ribbonLayer = this.layers.find(l => l.type === 'ribbon' && l.visible) as RibbonLayer;
     if (!ribbonLayer) {
       this.ctx.restore();
       return;
     }
 
-    if (ribbonLayer.data.style === 'badge') {
-      // Render straight text for badge
-      this.renderBadgeText(layer, text, fontSize, centerX, centerY, ribbonLayer);
-    } else {
-      // Render curved text for arc and image styles
-      this.renderCurvedText(layer, text, fontSize, centerX, centerY, ribbonLayer);
-    }
-
-    this.ctx.restore();
-  }
-
-  private renderBadgeText(
-    layer: TextLayer,
-    text: string,
-    fontSize: number,
-    centerX: number,
-    centerY: number,
-    ribbonLayer: RibbonLayer
-  ) {
-    const letterSpacing = layer.data.letterSpacing;
-    const x = centerX;
-    const y = centerY + ribbonLayer.data.badgeOffsetY;
-
-    this.ctx.save();
-    this.ctx.translate(x, y);
-    this.ctx.rotate((ribbonLayer.data.badgeRotation * Math.PI) / 180);
-
-    // Draw text with letter spacing
-    const chars = text.split('');
-    const charWidths = chars.map(char => this.ctx.measureText(char).width);
-    const totalWidth = charWidths.reduce((sum, w) => sum, 0) + (chars.length - 1) * letterSpacing;
-    
-    let currentX = -totalWidth / 2;
-    
-    chars.forEach((char, i) => {
-      const charX = currentX + charWidths[i] / 2;
-      
-      // Draw text stroke
-      if (layer.data.strokeWidth > 0) {
-        this.ctx.strokeStyle = layer.data.strokeColor;
-        this.ctx.lineWidth = layer.data.strokeWidth * 2;
-        this.ctx.strokeText(char, charX, 0);
-      }
-
-      // Draw text fill
-      this.ctx.fillStyle = layer.data.color;
-      this.ctx.fillText(char, charX, 0);
-      
-      currentX += charWidths[i] + letterSpacing;
-    });
+    // Render curved text for arc
+    this.renderCurvedText(layer, text, fontSize, centerX, centerY, ribbonLayer);
 
     this.ctx.restore();
   }
