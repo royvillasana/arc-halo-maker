@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { CanvasManager } from '@/lib/canvas-manager';
-import { AnyLayer } from '@/types/layer';
+import { AnyLayer, TextLayer, RibbonLayer } from '@/types/layer';
 import { Tool } from './CanvasToolbar';
 
 interface PhotoshopCanvasProps {
@@ -132,18 +132,83 @@ export const PhotoshopCanvas = ({
     return 'cursor-default';
   };
 
+  const formatText = (text: string, textCase: 'upper' | 'title' | 'lower'): string => {
+    switch (textCase) {
+      case 'upper':
+        return text.toUpperCase();
+      case 'lower':
+        return text.toLowerCase();
+      case 'title':
+        return text
+          .split(' ')
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join(' ');
+      default:
+        return text;
+    }
+  };
+
+  const textLayer = layers.find(l => l.type === 'text') as TextLayer | undefined;
+  const ribbonLayer = layers.find(l => l.type === 'ribbon') as RibbonLayer | undefined;
+
   return (
     <div className="flex items-center justify-center w-full h-full bg-[hsl(var(--canvas-bg))] rounded-lg border overflow-hidden">
-      <canvas
-        ref={canvasRef}
-        className={`max-w-full h-auto rounded-lg shadow-xl ${getCursorStyle()}`}
-        style={{ maxHeight: '600px' }}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
-      />
+      <div className="relative" style={{ maxHeight: '600px' }}>
+        <canvas
+          ref={canvasRef}
+          className={`max-w-full h-auto rounded-lg shadow-xl ${getCursorStyle()}`}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onWheel={handleWheel}
+        />
+        {textLayer && ribbonLayer && textLayer.visible && (
+          <svg
+            className="absolute top-0 left-0 w-full h-full pointer-events-none"
+            viewBox={`0 0 ${canvasSize} ${canvasSize}`}
+            style={{ maxHeight: '600px' }}
+          >
+            <defs>
+              <path
+                id="circlePath"
+                d={(() => {
+                  const centerX = canvasSize / 2;
+                  const centerY = canvasSize / 2;
+                  const radius = textLayer.data.ribbonRadius || canvasSize / 2;
+                  const adjustedRadius = radius - textLayer.data.radialOffset;
+                  const startAngle = ((ribbonLayer.data.startAngle - 90) * Math.PI) / 180;
+                  const endAngle = ((ribbonLayer.data.startAngle + ribbonLayer.data.arcWidth - 90) * Math.PI) / 180;
+                  
+                  const startX = centerX + adjustedRadius * Math.cos(startAngle);
+                  const startY = centerY + adjustedRadius * Math.sin(startAngle);
+                  const endX = centerX + adjustedRadius * Math.cos(endAngle);
+                  const endY = centerY + adjustedRadius * Math.sin(endAngle);
+                  
+                  const largeArcFlag = ribbonLayer.data.arcWidth > 180 ? 1 : 0;
+                  
+                  return `M ${startX} ${startY} A ${adjustedRadius} ${adjustedRadius} 0 ${largeArcFlag} 1 ${endX} ${endY}`;
+                })()}
+              />
+            </defs>
+            <text
+              fill={textLayer.data.color}
+              fontSize={textLayer.data.fontSize}
+              fontFamily={textLayer.data.fontFamily}
+              fontWeight="bold"
+              textAnchor="middle"
+              letterSpacing={textLayer.data.letterSpacing}
+              stroke={textLayer.data.strokeWidth > 0 ? textLayer.data.strokeColor : 'none'}
+              strokeWidth={textLayer.data.strokeWidth * 2}
+              paintOrder="stroke"
+            >
+              <textPath href="#circlePath" startOffset="50%">
+                {formatText(textLayer.data.content, textLayer.data.textCase)}
+              </textPath>
+            </text>
+          </svg>
+        )}
+      </div>
     </div>
   );
 };

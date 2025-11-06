@@ -67,7 +67,7 @@ export class CanvasManager {
           this.renderRibbonLayer(layer as RibbonLayer);
           break;
         case 'text':
-          this.renderTextLayer(layer as TextLayer);
+          // Text is now rendered via SVG overlay, skip canvas rendering
           break;
       }
 
