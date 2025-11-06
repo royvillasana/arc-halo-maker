@@ -273,7 +273,7 @@ const Index = () => {
 
         {/* Center Panel - Canvas */}
         <div className="flex-1 flex flex-col">
-          <div className="flex-1 p-4 flex flex-col items-center justify-center gap-4">
+          <div className="flex-1 p-4 flex flex-col items-center justify-center gap-6">
             {config.image ? (
               <>
                 <PhotoshopCanvas
@@ -292,8 +292,8 @@ const Index = () => {
                   onImageTransform={handleCanvasImageDrag}
                   onColorPick={handleColorPick}
                 />
-                <div className="flex justify-center">
-                  <div className="inline-flex bg-card border rounded-lg shadow-sm">
+                <div className="w-full flex justify-center pb-4">
+                  <div className="bg-card border rounded-lg shadow-md p-2">
                     <CanvasToolbar
                       activeTool={activeTool}
                       zoom={zoom}
