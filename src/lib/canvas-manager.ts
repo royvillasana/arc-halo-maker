@@ -127,20 +127,13 @@ export class CanvasManager {
     const offsetX = layer.data.x;
     const offsetY = layer.data.y;
 
-    // Calculate dimensions to fill the circle (object-fit: cover behavior)
+    // Calculate dimensions to fill horizontally while maintaining aspect ratio
     const imgAspect = img.naturalWidth / img.naturalHeight;
     const circleSize = this.canvasSize;
     
-    let drawWidth, drawHeight;
-    if (imgAspect > 1) {
-      // Landscape: fit height, crop width
-      drawHeight = circleSize * scale;
-      drawWidth = drawHeight * imgAspect;
-    } else {
-      // Portrait or square: fit width, crop height
-      drawWidth = circleSize * scale;
-      drawHeight = drawWidth / imgAspect;
-    }
+    // Always fill width (horizontally), let height adjust to maintain aspect ratio
+    const drawWidth = circleSize * scale;
+    const drawHeight = drawWidth / imgAspect;
 
     const x = centerX - drawWidth / 2 + offsetX;
     const y = centerY - drawHeight / 2 + offsetY;

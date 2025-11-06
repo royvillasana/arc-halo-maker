@@ -4,6 +4,7 @@ import { AnyLayer, ImageLayer, RibbonLayer, TextLayer, BackgroundLayer } from '@
 import { AvatarUploader } from '@/components/AvatarUploader';
 import { RibbonControls } from '@/components/RibbonControls';
 import { TextControls } from '@/components/TextControls';
+import { BackgroundControls } from '@/components/BackgroundControls';
 import { PresetList } from '@/components/PresetList';
 import { PhotoshopCanvas } from '@/components/PhotoshopCanvas';
 import { ExportPanel } from '@/components/ExportPanel';
@@ -23,6 +24,7 @@ const Index = () => {
   const [zoom, setZoom] = useState(1);
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
+  const [eyedropperMode, setEyedropperMode] = useState(false);
   const canvasSize = 800;
 
   // Convert config to layers
@@ -160,6 +162,24 @@ const Index = () => {
     setConfig((prev) => ({ ...prev, text }));
   };
 
+  const handleBackgroundChange = (background: AvatarConfig['background']) => {
+    setConfig((prev) => ({ ...prev, background }));
+  };
+
+  const handleEyedropperClick = () => {
+    setEyedropperMode(true);
+    toast.info('Click on the image to pick a color');
+  };
+
+  const handleColorPick = (color: string) => {
+    setConfig((prev) => ({ 
+      ...prev, 
+      background: { ...prev.background, color, type: 'solid' } 
+    }));
+    setEyedropperMode(false);
+    toast.success(`Color picked: ${color}`);
+  };
+
   const handlePresetSelect = (index: number) => {
     const preset = presets[index];
     setConfig((prev) => ({
@@ -239,8 +259,9 @@ const Index = () => {
         <div className="w-80 border-r bg-[hsl(var(--editor-panel))] overflow-auto">
           <div className="p-4">
             <Tabs defaultValue="upload" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="upload">Image</TabsTrigger>
+                <TabsTrigger value="background">BG</TabsTrigger>
                 <TabsTrigger value="ribbon">Ribbon</TabsTrigger>
                 <TabsTrigger value="text">Text</TabsTrigger>
               </TabsList>
@@ -259,6 +280,15 @@ const Index = () => {
                   <Separator />
 
                   <PresetList onSelectPreset={handlePresetSelect} />
+                </TabsContent>
+
+                <TabsContent value="background" className="space-y-4">
+                  <BackgroundControls 
+                    config={config.background} 
+                    onChange={handleBackgroundChange}
+                    onEyedropperClick={handleEyedropperClick}
+                    currentImage={config.image}
+                  />
                 </TabsContent>
 
                 <TabsContent value="ribbon" className="space-y-4">
@@ -297,11 +327,13 @@ const Index = () => {
                 panY={panY}
                 activeTool={activeTool}
                 selectedLayerId={selectedLayerId}
+                eyedropperMode={eyedropperMode}
                 onPanChange={(x, y) => {
                   setPanX(x);
                   setPanY(y);
                 }}
                 onImageTransform={handleCanvasImageDrag}
+                onColorPick={handleColorPick}
               />
             ) : (
               <Card className="w-full h-full flex items-center justify-center text-center text-muted-foreground">

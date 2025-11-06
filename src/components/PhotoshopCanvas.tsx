@@ -11,8 +11,10 @@ interface PhotoshopCanvasProps {
   panY: number;
   activeTool: Tool;
   selectedLayerId: string | null;
+  eyedropperMode: boolean;
   onPanChange: (x: number, y: number) => void;
   onImageTransform: (x: number, y: number) => void;
+  onColorPick: (color: string) => void;
 }
 
 export const PhotoshopCanvas = ({
@@ -23,8 +25,10 @@ export const PhotoshopCanvas = ({
   panY,
   activeTool,
   selectedLayerId,
+  eyedropperMode,
   onPanChange,
   onImageTransform,
+  onColorPick,
 }: PhotoshopCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<CanvasManager | null>(null);
@@ -59,6 +63,19 @@ export const PhotoshopCanvas = ({
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const coords = getCanvasCoordinates(e);
+
+    if (eyedropperMode) {
+      // Pick color from canvas
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          const pixel = ctx.getImageData(coords.x, coords.y, 1, 1).data;
+          const hex = `#${((1 << 24) + (pixel[0] << 16) + (pixel[1] << 8) + pixel[2]).toString(16).slice(1)}`;
+          onColorPick(hex);
+        }
+      }
+      return;
+    }
 
     if (activeTool === 'pan') {
       setIsDragging(true);
@@ -103,6 +120,9 @@ export const PhotoshopCanvas = ({
   };
 
   const getCursorStyle = () => {
+    if (eyedropperMode) {
+      return 'cursor-crosshair';
+    }
     if (activeTool === 'pan') {
       return isDragging ? 'cursor-grabbing' : 'cursor-grab';
     }
