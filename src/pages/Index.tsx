@@ -107,7 +107,7 @@ const Index = () => {
           visible: true,
           locked: false,
           opacity: 1,
-          zIndex: 3,
+          zIndex: 10,
           data: {
             content: config.text.content,
             textCase: config.text.textCase,
