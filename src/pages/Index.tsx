@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AvatarConfig, defaultAvatarConfig, presets } from '@/types/avatar';
 import { AnyLayer, ImageLayer, RibbonLayer, TextLayer, BackgroundLayer } from '@/types/layer';
 import { PresetList } from '@/components/PresetList';
@@ -8,6 +8,8 @@ import { LayerAccordion } from '@/components/LayerAccordion';
 import { CanvasToolbar, Tool } from '@/components/CanvasToolbar';
 import { Separator } from '@/components/ui/separator';
 import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -19,6 +21,7 @@ const Index = () => {
   const [panX, setPanX] = useState(0);
   const [panY, setPanY] = useState(0);
   const [eyedropperMode, setEyedropperMode] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasSize = 800;
 
   // Convert config to layers
@@ -123,6 +126,39 @@ const Index = () => {
 
     setLayers(newLayers);
   }, [config, canvasSize]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Image size must be less than 10MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        // Validate minimum size
+        if (img.width < 512 || img.height < 512) {
+          toast.error('Image must be at least 512x512 pixels');
+          return;
+        }
+        handleImageSelect(event.target?.result as string);
+        toast.success('Image uploaded successfully');
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleImageSelect = (imageUrl: string) => {
     setConfig((prev) => ({ ...prev, image: imageUrl }));
@@ -292,8 +328,22 @@ const Index = () => {
                 onColorPick={handleColorPick}
               />
             ) : (
-              <Card className="w-full h-full flex items-center justify-center text-center text-muted-foreground">
-                <p>Upload an image to get started</p>
+              <Card className="w-full h-full flex flex-col items-center justify-center text-center text-muted-foreground gap-4">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <Button
+                  size="lg"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="mr-2 h-5 w-5" />
+                  Upload Image
+                </Button>
+                <p className="text-sm">Upload an image to get started</p>
               </Card>
             )}
           </div>
