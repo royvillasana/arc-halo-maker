@@ -1,19 +1,13 @@
 import { useState, useEffect } from 'react';
 import { AvatarConfig, defaultAvatarConfig, presets } from '@/types/avatar';
 import { AnyLayer, ImageLayer, RibbonLayer, TextLayer, BackgroundLayer } from '@/types/layer';
-import { AvatarUploader } from '@/components/AvatarUploader';
-import { RibbonControls } from '@/components/RibbonControls';
-import { TextControls } from '@/components/TextControls';
-import { BackgroundControls } from '@/components/BackgroundControls';
 import { PresetList } from '@/components/PresetList';
 import { PhotoshopCanvas } from '@/components/PhotoshopCanvas';
 import { ExportPanel } from '@/components/ExportPanel';
-import { LayerPanel } from '@/components/LayerPanel';
+import { LayerAccordion } from '@/components/LayerAccordion';
 import { CanvasToolbar, Tool } from '@/components/CanvasToolbar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -259,52 +253,22 @@ const Index = () => {
       </header>
 
       <main className="h-[calc(100vh-73px)] flex">
-        {/* Left Panel - Controls */}
+        {/* Left Panel - Layer Accordion */}
         <div className="w-80 border-r bg-[hsl(var(--editor-panel))] overflow-auto">
-          <div className="p-4">
-            <Tabs defaultValue="upload" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="upload">Image</TabsTrigger>
-                <TabsTrigger value="background">BG</TabsTrigger>
-                <TabsTrigger value="ribbon">Ribbon</TabsTrigger>
-                <TabsTrigger value="text">Text</TabsTrigger>
-              </TabsList>
-
-              <ScrollArea className="h-[calc(100vh-200px)] mt-4">
-                <TabsContent value="upload" className="space-y-4">
-                  <AvatarUploader
-                    onImageSelect={handleImageSelect}
-                    currentImage={config.image}
-                    imageScale={config.imageScale}
-                    imageX={config.imageX}
-                    imageY={config.imageY}
-                    onImageTransform={handleImageTransform}
-                  />
-
-                  <Separator />
-
-                  <PresetList onSelectPreset={handlePresetSelect} />
-                </TabsContent>
-
-                <TabsContent value="background" className="space-y-4">
-                  <BackgroundControls 
-                    config={config.background} 
-                    onChange={handleBackgroundChange}
-                    onEyedropperClick={handleEyedropperClick}
-                    currentImage={config.image}
-                  />
-                </TabsContent>
-
-                <TabsContent value="ribbon" className="space-y-4">
-                  <RibbonControls config={config.ribbon} onChange={handleRibbonChange} />
-                </TabsContent>
-
-                <TabsContent value="text" className="space-y-4">
-                  <TextControls config={config.text} onChange={handleTextChange} />
-                </TabsContent>
-              </ScrollArea>
-            </Tabs>
-          </div>
+          <LayerAccordion
+            layers={layers}
+            config={config}
+            selectedLayerId={selectedLayerId}
+            onLayerSelect={handleLayerSelect}
+            onLayerToggleVisibility={handleLayerToggleVisibility}
+            onLayerToggleLock={handleLayerToggleLock}
+            onImageSelect={handleImageSelect}
+            onImageTransform={handleImageTransform}
+            onRibbonChange={handleRibbonChange}
+            onTextChange={handleTextChange}
+            onBackgroundChange={handleBackgroundChange}
+            onEyedropperClick={handleEyedropperClick}
+          />
         </div>
 
         {/* Center Panel - Canvas */}
@@ -347,18 +311,10 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Right Panel - Layers & Export */}
+        {/* Right Panel - Export */}
         <div className="w-80 border-l bg-[hsl(var(--editor-panel))] overflow-auto">
           <div className="p-4 space-y-4">
-            <LayerPanel
-              layers={layers}
-              selectedLayerId={selectedLayerId}
-              onLayerSelect={handleLayerSelect}
-              onLayerToggleVisibility={handleLayerToggleVisibility}
-              onLayerToggleLock={handleLayerToggleLock}
-              onLayerDelete={handleLayerDelete}
-              onLayerReorder={handleLayerReorder}
-            />
+            <PresetList onSelectPreset={handlePresetSelect} />
 
             <Separator />
 
