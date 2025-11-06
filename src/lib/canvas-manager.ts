@@ -167,17 +167,23 @@ export class CanvasManager {
 
     const text = this.formatText(textLayer.data.content, textLayer.data.textCase);
     const fontSize = textLayer.data.fontSize;
+    const letterSpacing = textLayer.data.letterSpacing;
     
     this.ctx.font = `bold ${fontSize}px ${textLayer.data.fontFamily}`;
-    const textWidth = this.ctx.measureText(text).width;
     
-    // Badge dimensions
-    const padding = 12;
-    const badgeWidth = textWidth + padding * 2;
-    const badgeHeight = fontSize + padding;
+    // Calculate text width with letter spacing
+    const chars = text.split('');
+    const totalLetterSpacing = (chars.length - 1) * letterSpacing;
+    const textWidth = this.ctx.measureText(text).width + totalLetterSpacing;
+    
+    // Badge dimensions matching CSS: padding: 8px 20px
+    const paddingX = 20;
+    const paddingY = 8;
+    const badgeWidth = textWidth + paddingX * 2;
+    const badgeHeight = fontSize + paddingY * 2;
     const borderRadius = badgeHeight / 2;
 
-    // Position (offsetY from center)
+    // Position at bottom (offsetY from center)
     const x = centerX;
     const y = centerY + layer.data.badgeOffsetY;
 
@@ -185,7 +191,7 @@ export class CanvasManager {
     this.ctx.translate(x, y);
     this.ctx.rotate((layer.data.badgeRotation * Math.PI) / 180);
 
-    // Shadow
+    // Shadow matching CSS: box-shadow: 0 2px 6px rgba(0,0,0,0.2)
     if (layer.data.shadowBlur > 0) {
       this.ctx.shadowBlur = layer.data.shadowBlur;
       this.ctx.shadowColor = `rgba(0, 0, 0, ${layer.data.shadowOpacity})`;
@@ -302,6 +308,7 @@ export class CanvasManager {
     centerY: number,
     ribbonLayer: RibbonLayer
   ) {
+    const letterSpacing = layer.data.letterSpacing;
     const x = centerX;
     const y = centerY + ribbonLayer.data.badgeOffsetY;
 
@@ -309,16 +316,29 @@ export class CanvasManager {
     this.ctx.translate(x, y);
     this.ctx.rotate((ribbonLayer.data.badgeRotation * Math.PI) / 180);
 
-    // Draw text stroke
-    if (layer.data.strokeWidth > 0) {
-      this.ctx.strokeStyle = layer.data.strokeColor;
-      this.ctx.lineWidth = layer.data.strokeWidth * 2;
-      this.ctx.strokeText(text, 0, 0);
-    }
+    // Draw text with letter spacing
+    const chars = text.split('');
+    const charWidths = chars.map(char => this.ctx.measureText(char).width);
+    const totalWidth = charWidths.reduce((sum, w) => sum, 0) + (chars.length - 1) * letterSpacing;
+    
+    let currentX = -totalWidth / 2;
+    
+    chars.forEach((char, i) => {
+      const charX = currentX + charWidths[i] / 2;
+      
+      // Draw text stroke
+      if (layer.data.strokeWidth > 0) {
+        this.ctx.strokeStyle = layer.data.strokeColor;
+        this.ctx.lineWidth = layer.data.strokeWidth * 2;
+        this.ctx.strokeText(char, charX, 0);
+      }
 
-    // Draw text fill
-    this.ctx.fillStyle = layer.data.color;
-    this.ctx.fillText(text, 0, 0);
+      // Draw text fill
+      this.ctx.fillStyle = layer.data.color;
+      this.ctx.fillText(char, charX, 0);
+      
+      currentX += charWidths[i] + letterSpacing;
+    });
 
     this.ctx.restore();
   }
