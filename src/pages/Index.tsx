@@ -352,7 +352,7 @@ const Index = () => {
           
           {/* Toolbar - Below canvas */}
           {config.image && (
-            <div className="flex justify-center p-4 border-t bg-background">
+            <div className="flex justify-center p-4 bg-background">
               <div className="bg-card border rounded-lg shadow-md p-2">
                 <CanvasToolbar
                   activeTool={activeTool}
