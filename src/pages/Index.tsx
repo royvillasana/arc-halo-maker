@@ -273,45 +273,47 @@ const Index = () => {
 
         {/* Center Panel - Canvas */}
         <div className="flex-1 flex flex-col">
-          <div className="flex-1 p-4 flex flex-col items-center justify-center gap-6">
+          <div className="flex-1 p-4 flex items-center justify-center overflow-auto">
             {config.image ? (
-              <>
-                <PhotoshopCanvas
-                  layers={layers}
-                  canvasSize={canvasSize}
-                  zoom={zoom}
-                  panX={panX}
-                  panY={panY}
-                  activeTool={activeTool}
-                  selectedLayerId={selectedLayerId}
-                  eyedropperMode={eyedropperMode}
-                  onPanChange={(x, y) => {
-                    setPanX(x);
-                    setPanY(y);
-                  }}
-                  onImageTransform={handleCanvasImageDrag}
-                  onColorPick={handleColorPick}
-                />
-                <div className="w-full flex justify-center pb-4">
-                  <div className="bg-card border rounded-lg shadow-md p-2">
-                    <CanvasToolbar
-                      activeTool={activeTool}
-                      zoom={zoom}
-                      onToolChange={setActiveTool}
-                      onZoomIn={handleZoomIn}
-                      onZoomOut={handleZoomOut}
-                      onResetView={handleResetView}
-                      onExport={handleExport}
-                    />
-                  </div>
-                </div>
-              </>
+              <PhotoshopCanvas
+                layers={layers}
+                canvasSize={canvasSize}
+                zoom={zoom}
+                panX={panX}
+                panY={panY}
+                activeTool={activeTool}
+                selectedLayerId={selectedLayerId}
+                eyedropperMode={eyedropperMode}
+                onPanChange={(x, y) => {
+                  setPanX(x);
+                  setPanY(y);
+                }}
+                onImageTransform={handleCanvasImageDrag}
+                onColorPick={handleColorPick}
+              />
             ) : (
               <Card className="w-full h-full flex items-center justify-center text-center text-muted-foreground">
                 <p>Upload an image to get started</p>
               </Card>
             )}
           </div>
+          
+          {/* Toolbar - Always at bottom */}
+          {config.image && (
+            <div className="flex justify-center p-4 border-t bg-background">
+              <div className="bg-card border rounded-lg shadow-md p-2">
+                <CanvasToolbar
+                  activeTool={activeTool}
+                  zoom={zoom}
+                  onToolChange={setActiveTool}
+                  onZoomIn={handleZoomIn}
+                  onZoomOut={handleZoomOut}
+                  onResetView={handleResetView}
+                  onExport={handleExport}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Panel - Export */}
