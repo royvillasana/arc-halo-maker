@@ -26,7 +26,7 @@ export const PresetList = ({ onSelectPreset }: PresetListProps) => {
           <Card key={preset.name} className="p-3 hover:shadow-md transition-shadow">
             <Button
               variant="ghost"
-              className="w-full justify-start p-0 h-auto hover:bg-transparent"
+              className="w-full justify-start p-0 h-auto hover:bg-transparent hover:text-foreground"
               onClick={() => onSelectPreset(index)}
             >
               <div className="flex items-center gap-3 w-full">
