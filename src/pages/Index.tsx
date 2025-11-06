@@ -126,6 +126,8 @@ const Index = () => {
 
   const handleImageSelect = (imageUrl: string) => {
     setConfig((prev) => ({ ...prev, image: imageUrl }));
+    // Auto-select image layer for immediate dragging
+    setSelectedLayerId('image');
   };
 
   const handleImageTransform = (scale: number, x: number, y: number) => {
@@ -135,6 +137,17 @@ const Index = () => {
     setLayers(prev => prev.map(layer => 
       layer.id === 'image' && layer.type === 'image'
         ? { ...layer, data: { ...layer.data, scale, x, y } }
+        : layer
+    ));
+  };
+
+  const handleCanvasImageDrag = (x: number, y: number) => {
+    setConfig((prev) => ({ ...prev, imageX: x, imageY: y }));
+    
+    // Update layer directly for real-time preview
+    setLayers(prev => prev.map(layer => 
+      layer.id === 'image' && layer.type === 'image'
+        ? { ...layer, data: { ...layer.data, x, y } }
         : layer
     ));
   };
@@ -283,10 +296,12 @@ const Index = () => {
                 panX={panX}
                 panY={panY}
                 activeTool={activeTool}
+                selectedLayerId={selectedLayerId}
                 onPanChange={(x, y) => {
                   setPanX(x);
                   setPanY(y);
                 }}
+                onImageTransform={handleCanvasImageDrag}
               />
             ) : (
               <Card className="w-full h-full flex items-center justify-center text-center text-muted-foreground">

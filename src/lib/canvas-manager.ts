@@ -126,11 +126,26 @@ export class CanvasManager {
     const scale = layer.data.scale;
     const offsetX = layer.data.x;
     const offsetY = layer.data.y;
-    const imgSize = this.canvasSize * scale;
-    const x = centerX - imgSize / 2 + offsetX;
-    const y = centerY - imgSize / 2 + offsetY;
 
-    this.ctx.drawImage(img, x, y, imgSize, imgSize);
+    // Calculate dimensions to fill the circle (object-fit: cover behavior)
+    const imgAspect = img.naturalWidth / img.naturalHeight;
+    const circleSize = this.canvasSize;
+    
+    let drawWidth, drawHeight;
+    if (imgAspect > 1) {
+      // Landscape: fit height, crop width
+      drawHeight = circleSize * scale;
+      drawWidth = drawHeight * imgAspect;
+    } else {
+      // Portrait or square: fit width, crop height
+      drawWidth = circleSize * scale;
+      drawHeight = drawWidth / imgAspect;
+    }
+
+    const x = centerX - drawWidth / 2 + offsetX;
+    const y = centerY - drawHeight / 2 + offsetY;
+
+    this.ctx.drawImage(img, x, y, drawWidth, drawHeight);
     this.ctx.restore();
   }
 
