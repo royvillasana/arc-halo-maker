@@ -6,6 +6,7 @@ import { PhotoshopCanvas } from '@/components/PhotoshopCanvas';
 import { ExportPanel } from '@/components/ExportPanel';
 import { LayerAccordion } from '@/components/LayerAccordion';
 import { CanvasToolbar, Tool } from '@/components/CanvasToolbar';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Separator } from '@/components/ui/separator';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -283,8 +284,9 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
-        <div className="container mx-auto py-4 px-4">
+        <div className="container mx-auto py-4 px-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold">Photoshop-Style Avatar Editor</h1>
+          <ThemeToggle />
         </div>
       </header>
 
