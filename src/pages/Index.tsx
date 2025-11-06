@@ -288,27 +288,9 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="h-[calc(100vh-73px)] flex">
-        {/* Left Panel - Layer Accordion */}
-        <div className="w-80 border-r bg-[hsl(var(--editor-panel))] overflow-auto">
-          <LayerAccordion
-            layers={layers}
-            config={config}
-            selectedLayerId={selectedLayerId}
-            onLayerSelect={handleLayerSelect}
-            onLayerToggleVisibility={handleLayerToggleVisibility}
-            onLayerToggleLock={handleLayerToggleLock}
-            onImageSelect={handleImageSelect}
-            onImageTransform={handleImageTransform}
-            onRibbonChange={handleRibbonChange}
-            onTextChange={handleTextChange}
-            onBackgroundChange={handleBackgroundChange}
-            onEyedropperClick={handleEyedropperClick}
-          />
-        </div>
-
-        {/* Center Panel - Canvas */}
-        <div className="flex-1 flex flex-col">
+      <main className="h-[calc(100vh-73px)] flex flex-col md:flex-row">
+        {/* Center Panel - Canvas - Order 1 on mobile, 2 on desktop */}
+        <div className="flex-1 flex flex-col order-1 md:order-2">
           <div className="flex-1 p-4 flex items-center justify-center overflow-auto min-h-0">
             <div className="w-full h-full flex items-center justify-center p-4">
               {config.image ? (
@@ -368,13 +350,33 @@ const Index = () => {
           )}
         </div>
 
-        {/* Right Panel - Export */}
-        {config.image && (
-          <div className="w-80 border-l bg-[hsl(var(--editor-panel))] overflow-auto">
-            <div className="p-4 space-y-4">
-              <PresetList onSelectPreset={handlePresetSelect} />
+        {/* Left Panel - Layer Accordion - Order 2 on mobile, 1 on desktop */}
+        <div className="w-full md:w-80 border-b md:border-b-0 md:border-r bg-[hsl(var(--editor-panel))] overflow-auto order-2 md:order-1">
+          <LayerAccordion
+            layers={layers}
+            config={config}
+            selectedLayerId={selectedLayerId}
+            onLayerSelect={handleLayerSelect}
+            onLayerToggleVisibility={handleLayerToggleVisibility}
+            onLayerToggleLock={handleLayerToggleLock}
+            onImageSelect={handleImageSelect}
+            onImageTransform={handleImageTransform}
+            onRibbonChange={handleRibbonChange}
+            onTextChange={handleTextChange}
+            onBackgroundChange={handleBackgroundChange}
+            onEyedropperClick={handleEyedropperClick}
+          />
+        </div>
 
-              <Separator />
+        {/* Right Panel - Presets (desktop only) + Export - Order 3 on mobile and desktop */}
+        {config.image && (
+          <div className="w-full md:w-80 border-t md:border-t-0 md:border-l bg-[hsl(var(--editor-panel))] overflow-auto order-3">
+            <div className="p-4 space-y-4">
+              {/* Hide presets on mobile */}
+              <div className="hidden md:block">
+                <PresetList onSelectPreset={handlePresetSelect} />
+                <Separator className="my-4" />
+              </div>
 
               <ExportPanel config={config} />
             </div>
