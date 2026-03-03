@@ -40,27 +40,40 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
         return;
       }
 
-      // Temporarily remove container background for clean export
+      // Temporarily clean up container and canvas styles for export
       const originalBg = canvasContainer.style.background;
       const originalBgColor = canvasContainer.style.backgroundColor;
       canvasContainer.style.background = 'transparent';
       canvasContainer.style.backgroundColor = 'transparent';
-      canvasContainer.classList.remove('border');
+      canvasContainer.classList.remove('border', 'rounded-lg');
+
+      const canvasEl = canvasContainer.querySelector('canvas');
+      const originalCanvasClass = canvasEl?.className || '';
+      if (canvasEl) {
+        canvasEl.classList.remove('shadow-xl', 'rounded-lg');
+      }
+
+      const containerWidth = canvasContainer.offsetWidth;
+      const containerHeight = canvasContainer.offsetHeight;
+      const scale = selectedSize / Math.min(containerWidth, containerHeight);
 
       // Capture the canvas with html2canvas at the selected size
       const capturedCanvas = await html2canvas(canvasContainer, {
         backgroundColor: null,
-        scale: selectedSize / 800,
+        scale,
         logging: false,
         useCORS: true,
-        width: canvasContainer.offsetWidth,
-        height: canvasContainer.offsetHeight,
+        width: containerWidth,
+        height: containerHeight,
       });
 
-      // Restore container styles
+      // Restore container and canvas styles
       canvasContainer.style.background = originalBg;
       canvasContainer.style.backgroundColor = originalBgColor;
-      canvasContainer.classList.add('border');
+      canvasContainer.classList.add('border', 'rounded-lg');
+      if (canvasEl) {
+        canvasEl.className = originalCanvasClass;
+      }
 
       // Create a new canvas with circular mask
       const outputCanvas = document.createElement('canvas');
