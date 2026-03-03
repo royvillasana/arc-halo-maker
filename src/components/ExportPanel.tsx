@@ -72,14 +72,27 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
       // Draw the source canvas (scales from 800x800 to selectedSize)
       ctx.drawImage(sourceCanvas, 0, 0, selectedSize, selectedSize);
 
-      // Now render SVG text onto the canvas
+      // Render SVG text overlay onto the export canvas
       const svgElement = canvasContainer.querySelector('svg');
       if (svgElement) {
-        const svgData = new XMLSerializer().serializeToString(svgElement);
+        // Clone SVG and ensure proper attributes for standalone rendering
+        const svgClone = svgElement.cloneNode(true) as SVGSVGElement;
+        svgClone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        svgClone.setAttribute('width', String(selectedSize));
+        svgClone.setAttribute('height', String(selectedSize));
+
+        // Inline font styles to ensure they render in the exported image
+        const textEl = svgClone.querySelector('text');
+        if (textEl) {
+          const computedStyle = window.getComputedStyle(svgElement.querySelector('text')!);
+          textEl.style.fontFamily = computedStyle.fontFamily;
+        }
+
+        const svgData = new XMLSerializer().serializeToString(svgClone);
         const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
         const svgUrl = URL.createObjectURL(svgBlob);
 
-        await new Promise<void>((resolve, reject) => {
+        await new Promise<void>((resolve) => {
           const img = new Image();
           img.onload = () => {
             ctx.drawImage(img, 0, 0, selectedSize, selectedSize);
@@ -88,7 +101,7 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
           };
           img.onerror = () => {
             URL.revokeObjectURL(svgUrl);
-            // SVG rendering failed, continue without text
+            console.warn('SVG text rendering failed, exporting without text');
             resolve();
           };
           img.src = svgUrl;
