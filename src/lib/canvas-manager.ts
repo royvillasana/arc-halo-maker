@@ -175,33 +175,45 @@ export class CanvasManager {
     }
 
     if (layer.data.useGradient) {
-      // Draw ribbon with gradient fade effect
       const fadePercent = layer.data.gradientFadePercent / 100;
-      const arcLength = layer.data.arcWidth;
-      const fadeAngle = arcLength * fadePercent;
-      const segments = 100; // Number of segments for smooth gradient
-      
-      const overlap = (endAngle - startAngle) / segments * 0.15;
-      for (let i = 0; i < segments; i++) {
-        const progress = i / segments;
-        const currentAngle = startAngle + (endAngle - startAngle) * progress;
-        const nextAngle = startAngle + (endAngle - startAngle) * (i + 1) / segments + overlap;
-        
-        // Calculate opacity based on position
-        let opacity = 1;
-        const angleFromStart = (currentAngle - startAngle) * (180 / Math.PI);
-        const angleFromEnd = (endAngle - currentAngle) * (180 / Math.PI);
-        
-        if (angleFromStart < fadeAngle) {
-          // Fade in at start
-          opacity = angleFromStart / fadeAngle;
-        } else if (angleFromEnd < fadeAngle) {
-          // Fade out at end
-          opacity = angleFromEnd / fadeAngle;
-        }
-        
+      const totalArcRad = endAngle - startAngle;
+      const fadeRad = totalArcRad * fadePercent;
+      const fadeSegments = 40;
+
+      // 1. Draw solid middle section
+      const solidStart = startAngle + fadeRad;
+      const solidEnd = endAngle - fadeRad;
+      if (solidStart < solidEnd) {
         this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, currentAngle, nextAngle);
+        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, solidStart, solidEnd);
+        this.ctx.lineWidth = ribbonThickness;
+        this.ctx.strokeStyle = layer.data.color;
+        this.ctx.stroke();
+      }
+
+      // 2. Fade in at start edge
+      for (let i = 0; i < fadeSegments; i++) {
+        const t0 = i / fadeSegments;
+        const t1 = (i + 1) / fadeSegments;
+        const a0 = startAngle + fadeRad * t0;
+        const a1 = startAngle + fadeRad * t1 + 0.002;
+        const opacity = t0;
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, a0, a1);
+        this.ctx.lineWidth = ribbonThickness;
+        this.ctx.strokeStyle = this.hexToRgba(layer.data.color, opacity);
+        this.ctx.stroke();
+      }
+
+      // 3. Fade out at end edge
+      for (let i = 0; i < fadeSegments; i++) {
+        const t0 = i / fadeSegments;
+        const t1 = (i + 1) / fadeSegments;
+        const a0 = solidEnd + fadeRad * t0;
+        const a1 = solidEnd + fadeRad * t1 + 0.002;
+        const opacity = 1 - t0;
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, a0, a1);
         this.ctx.lineWidth = ribbonThickness;
         this.ctx.strokeStyle = this.hexToRgba(layer.data.color, opacity);
         this.ctx.stroke();
