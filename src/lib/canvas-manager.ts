@@ -181,10 +181,11 @@ export class CanvasManager {
       const fadeAngle = arcLength * fadePercent;
       const segments = 100; // Number of segments for smooth gradient
       
+      const overlap = (endAngle - startAngle) / segments * 0.15;
       for (let i = 0; i < segments; i++) {
         const progress = i / segments;
         const currentAngle = startAngle + (endAngle - startAngle) * progress;
-        const nextAngle = startAngle + (endAngle - startAngle) * (i + 1) / segments;
+        const nextAngle = startAngle + (endAngle - startAngle) * (i + 1) / segments + overlap;
         
         // Calculate opacity based on position
         let opacity = 1;
