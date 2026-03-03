@@ -40,15 +40,27 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
         return;
       }
 
+      // Temporarily remove container background for clean export
+      const originalBg = canvasContainer.style.background;
+      const originalBgColor = canvasContainer.style.backgroundColor;
+      canvasContainer.style.background = 'transparent';
+      canvasContainer.style.backgroundColor = 'transparent';
+      canvasContainer.classList.remove('border');
+
       // Capture the canvas with html2canvas at the selected size
       const capturedCanvas = await html2canvas(canvasContainer, {
         backgroundColor: null,
-        scale: selectedSize / 800, // Scale to desired export size
+        scale: selectedSize / 800,
         logging: false,
         useCORS: true,
-        width: 800,
-        height: 800,
+        width: canvasContainer.offsetWidth,
+        height: canvasContainer.offsetHeight,
       });
+
+      // Restore container styles
+      canvasContainer.style.background = originalBg;
+      canvasContainer.style.backgroundColor = originalBgColor;
+      canvasContainer.classList.add('border');
 
       // Create a new canvas with circular mask
       const outputCanvas = document.createElement('canvas');
