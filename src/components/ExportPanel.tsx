@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card } from '@/components/ui/card';
 import { AvatarConfig } from '@/types/avatar';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
 
 interface ExportPanelProps {
   config: AvatarConfig;
@@ -32,7 +31,6 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
 
     setIsExporting(true);
     try {
-      // Find the canvas container
       const canvasContainer = document.getElementById('avatar-canvas-container') as HTMLElement;
       if (!canvasContainer) {
         toast.error('Canvas not found');
@@ -40,42 +38,15 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
         return;
       }
 
-      // Temporarily clean up container and canvas styles for export
-      const originalBg = canvasContainer.style.background;
-      const originalBgColor = canvasContainer.style.backgroundColor;
-      canvasContainer.style.background = 'transparent';
-      canvasContainer.style.backgroundColor = 'transparent';
-      canvasContainer.classList.remove('border', 'rounded-lg');
-
-      const canvasEl = canvasContainer.querySelector('canvas');
-      const originalCanvasClass = canvasEl?.className || '';
-      if (canvasEl) {
-        canvasEl.classList.remove('shadow-xl', 'rounded-lg');
+      // Get the source canvas element directly (already has rendered content at 800x800)
+      const sourceCanvas = canvasContainer.querySelector('canvas') as HTMLCanvasElement;
+      if (!sourceCanvas) {
+        toast.error('Canvas element not found');
+        setIsExporting(false);
+        return;
       }
 
-      const containerWidth = canvasContainer.offsetWidth;
-      const containerHeight = canvasContainer.offsetHeight;
-      const scale = selectedSize / Math.min(containerWidth, containerHeight);
-
-      // Capture the canvas with html2canvas at the selected size
-      const capturedCanvas = await html2canvas(canvasContainer, {
-        backgroundColor: null,
-        scale,
-        logging: false,
-        useCORS: true,
-        width: containerWidth,
-        height: containerHeight,
-      });
-
-      // Restore container and canvas styles
-      canvasContainer.style.background = originalBg;
-      canvasContainer.style.backgroundColor = originalBgColor;
-      canvasContainer.classList.add('border', 'rounded-lg');
-      if (canvasEl) {
-        canvasEl.className = originalCanvasClass;
-      }
-
-      // Create a new canvas with circular mask
+      // Create output canvas at desired export size
       const outputCanvas = document.createElement('canvas');
       outputCanvas.width = selectedSize;
       outputCanvas.height = selectedSize;
@@ -87,19 +58,43 @@ export const ExportPanel = ({ config }: ExportPanelProps) => {
         return;
       }
 
-      // Create circular clip path
       const centerX = selectedSize / 2;
       const centerY = selectedSize / 2;
       const radius = selectedSize / 2;
 
+      // Apply circular clip
       ctx.save();
       ctx.beginPath();
       ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
       ctx.closePath();
       ctx.clip();
 
-      // Draw the captured canvas inside the circle
-      ctx.drawImage(capturedCanvas, 0, 0, selectedSize, selectedSize);
+      // Draw the source canvas (scales from 800x800 to selectedSize)
+      ctx.drawImage(sourceCanvas, 0, 0, selectedSize, selectedSize);
+
+      // Now render SVG text onto the canvas
+      const svgElement = canvasContainer.querySelector('svg');
+      if (svgElement) {
+        const svgData = new XMLSerializer().serializeToString(svgElement);
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const svgUrl = URL.createObjectURL(svgBlob);
+
+        await new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            ctx.drawImage(img, 0, 0, selectedSize, selectedSize);
+            URL.revokeObjectURL(svgUrl);
+            resolve();
+          };
+          img.onerror = () => {
+            URL.revokeObjectURL(svgUrl);
+            // SVG rendering failed, continue without text
+            resolve();
+          };
+          img.src = svgUrl;
+        });
+      }
+
       ctx.restore();
 
       // Download the image
