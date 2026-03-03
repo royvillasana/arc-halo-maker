@@ -178,50 +178,53 @@ export class CanvasManager {
       const fadePercent = layer.data.gradientFadePercent / 100;
       const totalArcRad = endAngle - startAngle;
       const fadeRad = totalArcRad * fadePercent;
+      const arcRadius = ribbonRadius + ribbonThickness / 2;
 
-      // Use offscreen canvas to draw ribbon + apply fade mask
-      const offscreen = document.createElement('canvas');
-      offscreen.width = this.canvasSize;
-      offscreen.height = this.canvasSize;
-      const offCtx = offscreen.getContext('2d')!;
-
-      // Draw full solid ribbon on offscreen canvas
-      offCtx.beginPath();
-      offCtx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, startAngle, endAngle);
-      offCtx.lineWidth = ribbonThickness;
-      offCtx.strokeStyle = layer.data.color;
-      offCtx.stroke();
-
-      // Apply fade mask using destination-in compositing
-      offCtx.globalCompositeOperation = 'destination-in';
-
-      // Create a radial sweep mask by drawing a full arc with varying alpha
-      const maskSegments = 80;
-      for (let i = 0; i < maskSegments; i++) {
-        const t = i / maskSegments;
-        const a0 = startAngle + totalArcRad * t;
-        const a1 = startAngle + totalArcRad * (i + 1) / maskSegments + 0.003;
-
-        // Calculate alpha: full opacity in middle, fade at edges
-        let alpha = 1;
-        const angleFromStart = t * totalArcRad;
-        const angleFromEnd = totalArcRad - angleFromStart;
-
-        if (angleFromStart < fadeRad) {
-          alpha = angleFromStart / fadeRad;
-        } else if (angleFromEnd < fadeRad) {
-          alpha = angleFromEnd / fadeRad;
-        }
-
-        offCtx.beginPath();
-        offCtx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, a0, a1);
-        offCtx.lineWidth = ribbonThickness + 4; // slightly thicker to fully cover
-        offCtx.strokeStyle = `rgba(255,255,255,${alpha})`;
-        offCtx.stroke();
+      // 1. Draw solid middle section (single arc, no segments = no lines)
+      const solidStart = startAngle + fadeRad;
+      const solidEnd = endAngle - fadeRad;
+      if (solidEnd > solidStart) {
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, arcRadius, solidStart, solidEnd);
+        this.ctx.lineWidth = ribbonThickness;
+        this.ctx.strokeStyle = layer.data.color;
+        this.ctx.stroke();
       }
 
-      // Draw offscreen result onto main canvas
-      this.ctx.drawImage(offscreen, 0, 0);
+      // 2. Draw start fade (many small segments with increasing globalAlpha)
+      const fadeSegments = 40;
+      for (let i = 0; i < fadeSegments; i++) {
+        const t = i / fadeSegments;
+        const nextT = (i + 1) / fadeSegments;
+        const a0 = startAngle + fadeRad * t;
+        const a1 = startAngle + fadeRad * nextT + 0.002; // tiny overlap
+
+        this.ctx.save();
+        this.ctx.globalAlpha = layer.opacity * (t * t); // quadratic ease-in for smoother fade
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, arcRadius, a0, a1);
+        this.ctx.lineWidth = ribbonThickness;
+        this.ctx.strokeStyle = layer.data.color;
+        this.ctx.stroke();
+        this.ctx.restore();
+      }
+
+      // 3. Draw end fade (many small segments with decreasing globalAlpha)
+      for (let i = 0; i < fadeSegments; i++) {
+        const t = i / fadeSegments;
+        const nextT = (i + 1) / fadeSegments;
+        const a0 = endAngle - fadeRad + fadeRad * t;
+        const a1 = endAngle - fadeRad + fadeRad * nextT + 0.002;
+
+        this.ctx.save();
+        this.ctx.globalAlpha = layer.opacity * ((1 - nextT) * (1 - nextT)); // quadratic ease-out
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, arcRadius, a0, a1);
+        this.ctx.lineWidth = ribbonThickness;
+        this.ctx.strokeStyle = layer.data.color;
+        this.ctx.stroke();
+        this.ctx.restore();
+      }
     } else {
       // Draw solid ribbon arc
       this.ctx.beginPath();
