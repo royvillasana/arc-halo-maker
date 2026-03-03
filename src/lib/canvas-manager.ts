@@ -178,46 +178,50 @@ export class CanvasManager {
       const fadePercent = layer.data.gradientFadePercent / 100;
       const totalArcRad = endAngle - startAngle;
       const fadeRad = totalArcRad * fadePercent;
-      const fadeSegments = 40;
 
-      // 1. Draw solid middle section
-      const solidStart = startAngle + fadeRad;
-      const solidEnd = endAngle - fadeRad;
-      if (solidStart < solidEnd) {
-        this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, solidStart, solidEnd);
-        this.ctx.lineWidth = ribbonThickness;
-        this.ctx.strokeStyle = layer.data.color;
-        this.ctx.stroke();
+      // Use offscreen canvas to draw ribbon + apply fade mask
+      const offscreen = document.createElement('canvas');
+      offscreen.width = this.canvasSize;
+      offscreen.height = this.canvasSize;
+      const offCtx = offscreen.getContext('2d')!;
+
+      // Draw full solid ribbon on offscreen canvas
+      offCtx.beginPath();
+      offCtx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, startAngle, endAngle);
+      offCtx.lineWidth = ribbonThickness;
+      offCtx.strokeStyle = layer.data.color;
+      offCtx.stroke();
+
+      // Apply fade mask using destination-in compositing
+      offCtx.globalCompositeOperation = 'destination-in';
+
+      // Create a radial sweep mask by drawing a full arc with varying alpha
+      const maskSegments = 80;
+      for (let i = 0; i < maskSegments; i++) {
+        const t = i / maskSegments;
+        const a0 = startAngle + totalArcRad * t;
+        const a1 = startAngle + totalArcRad * (i + 1) / maskSegments + 0.003;
+
+        // Calculate alpha: full opacity in middle, fade at edges
+        let alpha = 1;
+        const angleFromStart = t * totalArcRad;
+        const angleFromEnd = totalArcRad - angleFromStart;
+
+        if (angleFromStart < fadeRad) {
+          alpha = angleFromStart / fadeRad;
+        } else if (angleFromEnd < fadeRad) {
+          alpha = angleFromEnd / fadeRad;
+        }
+
+        offCtx.beginPath();
+        offCtx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, a0, a1);
+        offCtx.lineWidth = ribbonThickness + 4; // slightly thicker to fully cover
+        offCtx.strokeStyle = `rgba(255,255,255,${alpha})`;
+        offCtx.stroke();
       }
 
-      // 2. Fade in at start edge
-      for (let i = 0; i < fadeSegments; i++) {
-        const t0 = i / fadeSegments;
-        const t1 = (i + 1) / fadeSegments;
-        const a0 = startAngle + fadeRad * t0;
-        const a1 = startAngle + fadeRad * t1 + 0.002;
-        const opacity = t0;
-        this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, a0, a1);
-        this.ctx.lineWidth = ribbonThickness;
-        this.ctx.strokeStyle = this.hexToRgba(layer.data.color, opacity);
-        this.ctx.stroke();
-      }
-
-      // 3. Fade out at end edge
-      for (let i = 0; i < fadeSegments; i++) {
-        const t0 = i / fadeSegments;
-        const t1 = (i + 1) / fadeSegments;
-        const a0 = solidEnd + fadeRad * t0;
-        const a1 = solidEnd + fadeRad * t1 + 0.002;
-        const opacity = 1 - t0;
-        this.ctx.beginPath();
-        this.ctx.arc(centerX, centerY, ribbonRadius + ribbonThickness / 2, a0, a1);
-        this.ctx.lineWidth = ribbonThickness;
-        this.ctx.strokeStyle = this.hexToRgba(layer.data.color, opacity);
-        this.ctx.stroke();
-      }
+      // Draw offscreen result onto main canvas
+      this.ctx.drawImage(offscreen, 0, 0);
     } else {
       // Draw solid ribbon arc
       this.ctx.beginPath();
@@ -263,14 +267,12 @@ export class CanvasManager {
     this.ctx.textAlign = 'center';
     this.ctx.textBaseline = 'middle';
 
-    // Find ribbon layer
     const ribbonLayer = this.layers.find(l => l.type === 'ribbon' && l.visible) as RibbonLayer;
     if (!ribbonLayer) {
       this.ctx.restore();
       return;
     }
 
-    // Render curved text for arc
     this.renderCurvedText(layer, text, fontSize, centerX, centerY, ribbonLayer);
 
     this.ctx.restore();
@@ -289,11 +291,9 @@ export class CanvasManager {
     const textRadius = layer.data.ribbonRadius;
     const letterSpacing = layer.data.letterSpacing;
 
-    // Calculate total text width including letter spacing
     const charWidths = text.split('').map((char) => this.ctx.measureText(char).width + letterSpacing);
     const totalWidth = charWidths.reduce((sum, w) => sum + w, 0);
 
-    // Calculate arc angle for the text
     const anglePerPixel = 1 / textRadius;
     const totalAngle = totalWidth * anglePerPixel;
 
@@ -302,7 +302,6 @@ export class CanvasManager {
       (ribbonLayer.data.arcWidth * Math.PI) / 360 -
       totalAngle / 2;
 
-    // Draw each character
     let currentAngle = startAngle;
     text.split('').forEach((char, i) => {
       this.ctx.save();
@@ -310,14 +309,12 @@ export class CanvasManager {
       this.ctx.rotate(currentAngle + (charWidths[i] * anglePerPixel) / 2 + Math.PI / 2);
       this.ctx.translate(0, -textRadius - layer.data.radialOffset);
 
-      // Draw text stroke
       if (layer.data.strokeWidth > 0) {
         this.ctx.strokeStyle = layer.data.strokeColor;
         this.ctx.lineWidth = layer.data.strokeWidth * 2;
         this.ctx.strokeText(char, 0, 0);
       }
 
-      // Draw text fill
       this.ctx.fillStyle = layer.data.color;
       this.ctx.fillText(char, 0, 0);
 
